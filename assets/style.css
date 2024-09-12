@@ -1,0 +1,34 @@
+.card-custom{
+    padding: 3px;
+    font-size: smaller;
+    text-align: center;
+}
+
+.card-custom .card-body{
+    padding:4px;
+}
+
+/* This is a little popup on Dash charts that I accidentally click often */
+.modebar {
+    display: none;
+}
+
+.DateInput_input{
+    padding:4px;
+    font-size: inherit;
+    color: #333;
+    font-weight: normal;
+    text-align: center;
+}
+
+.ag-theme-alpine {
+    --ag-font-size: 11px !important;
+}
+
+.ag-cell{
+    padding: 0 5px !important;
+}
+
+.ag-header-cell{
+    padding:0 5px !important;
+}

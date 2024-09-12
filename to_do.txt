@@ -1,0 +1,34 @@
+# TODO
+
+# Reports
+    # Get sales from the month prior and overlay bar graph
+    # Get sales from 1 year prior and overlay bar graph
+    # profit yesterday
+        # look into finance reports
+        # where are ads / ppc? https://advertising.amazon.com/about-api
+    # Modify show_averages() to use getSalesByWeek()
+    # Competition pricing and sales (if possible)
+        # Pricing API {{baseUrl}}/products/pricing/v0/competitivePrice?MarketplaceId=ATVPDKIKX0DER&Asins=B0CKVN852J&ItemType=Asin&CustomerType=Consumer
+
+# Deploy
+    # Host somewhere accessible
+
+# Bugs
+    # Improve mobile formatting
+    # Something with bar chart times out if left for a while and then page refresh. Look into current day
+        # Need to reinstantiate AmzService to get new token before call?
+
+Cache
+    # Consider creating 8 week average Cache
+    # Profit by day
+
+Style
+    # DatePicker and ASIN drop down row/col styling, esp mobile
+
+Management
+    # Profitability per SKU/ASIN
+    # Bag count, label count, insert count
+    # Tell me when to order more of the above
+    # Competitor ASINS
+    # Competitor reviews
+    # My reviews
