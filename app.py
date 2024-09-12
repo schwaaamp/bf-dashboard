@@ -105,6 +105,8 @@ def getSalesForDatesByAsin(start, end, asin, granularity):
         granularity = 'Date'
 
     bar_chart = px.bar(df, x=granularity, y="Sales", color="Product", barmode="stack", template="minty")
+    bar_chart.layout.xaxis.fixedrange = True
+    bar_chart.layout.yaxis.fixedrange = True
     pie_chart = px.pie(df, values='Sales', names='Product', title='Sales by Product', template="minty")
     pie_chart.update_layout(showlegend = False)
 
