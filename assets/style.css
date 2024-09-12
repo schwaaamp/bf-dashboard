@@ -1,11 +1,10 @@
-.card-custom{
-    padding: 3px;
-    font-size: smaller;
+.card-body{
     text-align: center;
+    font-size: smaller;
 }
 
-.card-custom .card-body{
-    padding:4px;
+.card-title{
+    min-height: 50px;
 }
 
 /* This is a little popup on Dash charts that I accidentally click often */

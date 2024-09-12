@@ -45,13 +45,13 @@ def show_averages():
             decorator = 'bg-warning text-dark'
 
 
-        col = html.Div([
+        col = dbc.Col([
             html.Div([
                 html.Div([
                     html.P(df.get('Product')[0], className='card-title'),
                     html.Div('$' + str(sales_lw), style={'font-weight': 'bold'}),
                     html.Div('$' + str(sales_avg), style={'opacity':'.8'})], className="card-body")], className='card ' + decorator)
-                ], id=asin, className="col-sm-3 card-custom")
+                ], className='col-lg-3', style={'padding':'3px'})
         row.append(col)
     return row
 
@@ -64,7 +64,7 @@ def getSalesForToday():
     df = amzService.getSales('', date.today(), date.today(), 'Day')
     df.columns = cols_clean
 
-    return html.H2('Today\'s Sales (US)'), html.Div([
+    return html.H2('Today\'s Sales (US)'), dbc.Col([
             html.Div([
                 html.Div([
                     html.H5(str('${:,.2f}'.format(df.get('Total Sales')[0]))),
@@ -162,22 +162,22 @@ asinDD = asinSkuMapper.copy()
 asinDD["All"] = ["All", "All"]
 
 app.layout = html.H1(children='Amazon Sales'), html.Div([
-        html.Div([
-            html.Div([html.Div(show_averages(), className='row')], className='col-lg-5'), 
-            html.Div(getSalesForToday(), id='todays-sales', className='col-lg-3'),
-            html.Div([html.H2('Inventory needs'), getInventory()], className='col-lg-4')], className='row'),
-            html.Div([
-                html.Div([
+        dbc.Row([
+            dbc.Col(dbc.Row(show_averages())), 
+            dbc.Col(getSalesForToday()),
+            dbc.Col([html.H2('Inventory needs'), getInventory()])]),
+            dbc.Row([
+                dbc.Col([
                     dcc.DatePickerRange(
                         id='my-date-picker-range',
                         initial_visible_month=date.today(),
                         start_date=date.today() - timedelta(days=30),
                         end_date=date.today()
-                    )], className='col-3'),
-                html.Div([
-                    dcc.Dropdown(list(asinDD.keys()), 'All', id='asin-dd')], className='col-3'),
-                html.Div([dcc.Dropdown(['Day', 'Week', 'Month'], 'Day', id='granularity-dd')], className='col-3')], className='row justify-content-start'),
-            html.Div(id='sales-report-body'),
+                    )]),
+                dbc.Col([
+                    dcc.Dropdown(list(asinDD.keys()), 'All', id='asin-dd')]),
+                dbc.Col([dcc.Dropdown(['Day', 'Week', 'Month'], 'Day', id='granularity-dd')])], className='justify-content-start'),
+            dbc.Row([dbc.Col(html.Div(id='sales-report-body'))]),
             html.P('https://sellercentral.amazon.com/sp-api-status')], 
         className='container')
 
