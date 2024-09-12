@@ -141,7 +141,8 @@ def getInventory():
         columnDefs=columnDefs,
         columnSize="responsiveSizeToFit",
     )
-    return grid
+    #return grid
+    return dbc.Col(grid, className='col-sm')
 
 
 
@@ -163,9 +164,9 @@ asinDD["All"] = ["All", "All"]
 
 app.layout = html.H1(children='Amazon Sales'), html.Div([
         dbc.Row([
-            dbc.Col(dbc.Row(show_averages())), 
-            dbc.Col(getSalesForToday()),
-            dbc.Col([html.H2('Inventory needs'), getInventory()])]),
+            html.Div(dbc.Row(show_averages()), className='col-sm'), 
+            html.Div(getSalesForToday(), className='col-sm'),
+            html.Div([html.H2('Inventory needs'), getInventory()], className='col-sm')]),
             dbc.Row([
                 dbc.Col([
                     dcc.DatePickerRange(
