@@ -9,9 +9,8 @@
     # Modify show_averages() to use getSalesByWeek()
     # Competition pricing and sales (if possible)
         # Pricing API {{baseUrl}}/products/pricing/v0/competitivePrice?MarketplaceId=ATVPDKIKX0DER&Asins=B0CKVN852J&ItemType=Asin&CustomerType=Consumer
-
-# Deploy
-    # Host somewhere accessible
+    # Storage fees by month
+    # Profitability
 
 # Bugs
     # Improve mobile formatting

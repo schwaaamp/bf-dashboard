@@ -130,8 +130,7 @@ def getInventory():
         { 'field': 'Weeks On Hand', 
             "type": "numericColumn",
             'cellClassRules': {
-                'bg-warning ': '6 > params.value && params.value > 4 ',
-                'bg-danger ': '4.1 > params.value ',
+                'bg-danger text-white font-weight-bold': '6 > params.value',
             },
         },
     ]
