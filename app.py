@@ -108,7 +108,7 @@ def getSalesForDatesByAsin(start, end, asin, granularity):
     bar_chart.layout.xaxis.fixedrange = True
     bar_chart.layout.yaxis.fixedrange = True
     bar_chart.update_layout(showlegend = False)
-    pie_chart = px.pie(df, values='Sales', names='Product', title='Sales by Product', template="minty")
+    pie_chart = px.pie(df, values='Sales', names='Product', template="minty")
     pie_chart.update_layout(showlegend = False)
 
     return html.Div([
@@ -168,6 +168,7 @@ app.layout = html.H1(children='Amazon Sales'), html.Div([
             html.Div(getSalesForToday(), className='col-sm'),
             html.Div(dbc.Row(show_averages()), className='col-sm'), 
             html.Div([html.H2('Inventory needs'), getInventory()], className='col-sm')], className='my-1'),
+            dbc.Row(dbc.Col(html.H2('Product Sales'))),
             dbc.Row([
                 dbc.Col([
                     dcc.DatePickerRange(
