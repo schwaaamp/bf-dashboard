@@ -1,4 +1,3 @@
-# Import packages
 import calendar
 from datetime import date, timedelta
 from dash import Dash, html, dcc, Input, Output, callback, dash_table
@@ -125,8 +124,8 @@ def getInventory():
     df = inventoryService.getInventoryNeeds()    
     columnDefs = [
         { 'field': 'ASIN'},
-        { 'field': 'Available', "type": "numericColumn" },
-        { 'field': 'Total On Hand', "type": "numericColumn" },
+        { 'field': 'Available', "type": "numericColumn"},
+        { 'field': 'Total On Hand', "type": "numericColumn"},
         { 'field': 'Weeks On Hand', 
             "type": "numericColumn",
             'cellClassRules': {
@@ -139,9 +138,9 @@ def getInventory():
         id="inventoryNeeds",
         rowData=df.to_dict("records"),
         columnDefs=columnDefs,
-        columnSize="responsiveSizeToFit",
+        columnSize="sizeToFit",
+        style={"height": "344px", "width": "412px"}
     )
-    #return grid
     return dbc.Col(grid, className='col-sm')
 
 
@@ -164,8 +163,8 @@ asinDD["All"] = ["All", "All"]
 
 app.layout = html.H1(children='Amazon Sales'), html.Div([
         dbc.Row([
-            html.Div(dbc.Row(show_averages()), className='col-sm'), 
             html.Div(getSalesForToday(), className='col-sm'),
+            html.Div(dbc.Row(show_averages()), className='col-sm'), 
             html.Div([html.H2('Inventory needs'), getInventory()], className='col-sm')]),
             dbc.Row([
                 dbc.Col([

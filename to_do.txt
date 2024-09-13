@@ -11,6 +11,7 @@
         # Pricing API {{baseUrl}}/products/pricing/v0/competitivePrice?MarketplaceId=ATVPDKIKX0DER&Asins=B0CKVN852J&ItemType=Asin&CustomerType=Consumer
     # Storage fees by month
     # Profitability
+    # FBA Shipments not matching (shipped vs received)
 
 # Bugs
     # Improve mobile formatting
