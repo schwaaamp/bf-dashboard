@@ -165,7 +165,7 @@ app.layout = html.H1(children='Amazon Sales'), html.Div([
         dbc.Row([
             html.Div(getSalesForToday(), className='col-sm'),
             html.Div(dbc.Row(show_averages()), className='col-sm'), 
-            html.Div([html.H2('Inventory needs'), getInventory()], className='col-sm')]),
+            html.Div([html.H2('Inventory needs'), getInventory()], className='col-sm')], className='my-1'),
             dbc.Row([
                 dbc.Col([
                     dcc.DatePickerRange(
@@ -173,10 +173,10 @@ app.layout = html.H1(children='Amazon Sales'), html.Div([
                         initial_visible_month=date.today(),
                         start_date=date.today() - timedelta(days=30),
                         end_date=date.today()
-                    )]),
+                    )], width="auto"),
                 dbc.Col([
-                    dcc.Dropdown(list(asinDD.keys()), 'All', id='asin-dd')]),
-                dbc.Col([dcc.Dropdown(['Day', 'Week', 'Month'], 'Day', id='granularity-dd')])], className='justify-content-start'),
+                    dcc.Dropdown(list(asinDD.keys()), 'All', id='asin-dd', clearable=False, style={'width':'130px'})], width="auto"),
+                dbc.Col([dcc.Dropdown(['Day', 'Week', 'Month'], 'Week', id='granularity-dd', clearable=False, style={'width':'100px'})], width="auto")], className='my-1'),
             dbc.Row([dbc.Col(html.Div(id='sales-report-body'))]),
             html.P('https://sellercentral.amazon.com/sp-api-status')], 
         className='container')
