@@ -12,6 +12,9 @@
     # Storage fees by month
     # Profitability
     # FBA Shipments not matching (shipped vs received)
+    # Reviews
+        # Product Advertising API: https://webservices.amazon.com/paapi5/documentation/
+        # Scratchpad: https://webservices.amazon.com/paapi5/scratchpad/index.html
 
 # Bugs
     # Improve mobile formatting
@@ -23,7 +26,6 @@ Cache
     # Profit by day
 
 Style
-    # DatePicker and ASIN drop down row/col styling, esp mobile
     # Change to Dash layout to improve mobile view: https://dash-bootstrap-components.opensource.faculty.ai/docs/components/layout/
 
 Management

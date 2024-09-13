@@ -14,10 +14,10 @@ from credentials import credentials
 from salesService import SalesService
 from inventoryService import InventoryService
 from flask import Flask, session
+import tkinter as tk
 
 salesService = SalesService()
 inventoryService = InventoryService()
-cols_clean =['Day', 'Unit Count', 'Order Item Count', 'Order Count', 'Avg Unit Price', 'Currency', 'Total Sales', 'Currency2']
 
 
 def show_averages():
@@ -61,7 +61,7 @@ def show_averages():
 def getSalesForToday():
     amzService = AmzService()
     df = amzService.getSales('', date.today(), date.today(), 'Day')
-    df.columns = cols_clean
+    df.columns = ['Day', 'Unit Count', 'Order Item Count', 'Order Count', 'Avg Unit Price', 'Currency', 'Total Sales', 'Currency2']
 
     return html.H2('Today\'s Sales (US)'), dbc.Col([
             html.Div([
@@ -103,9 +103,11 @@ def getSalesForDatesByAsin(start, end, asin, granularity):
         # Change from Day to Date for bar chart
         granularity = 'Date'
 
+    
     bar_chart = px.bar(df, x=granularity, y="Sales", color="Product", barmode="stack", template="minty")
     bar_chart.layout.xaxis.fixedrange = True
     bar_chart.layout.yaxis.fixedrange = True
+    bar_chart.update_layout(showlegend = False)
     pie_chart = px.pie(df, values='Sales', names='Product', title='Sales by Product', template="minty")
     pie_chart.update_layout(showlegend = False)
 
@@ -139,7 +141,7 @@ def getInventory():
         rowData=df.to_dict("records"),
         columnDefs=columnDefs,
         columnSize="sizeToFit",
-        style={"height": "344px", "width": "412px"}
+        style={"height": "344px", "width": "400px"}
     )
     return dbc.Col(grid, className='col-sm')
 
@@ -174,8 +176,7 @@ app.layout = html.H1(children='Amazon Sales'), html.Div([
                         start_date=date.today() - timedelta(days=30),
                         end_date=date.today()
                     )], width="auto"),
-                dbc.Col([
-                    dcc.Dropdown(list(asinDD.keys()), 'All', id='asin-dd', clearable=False, style={'width':'130px'})], width="auto"),
+                dbc.Col([dcc.Dropdown(list(asinDD.keys()), 'All', id='asin-dd', clearable=False, style={'width':'130px'})], width="auto"),
                 dbc.Col([dcc.Dropdown(['Day', 'Week', 'Month'], 'Week', id='granularity-dd', clearable=False, style={'width':'100px'})], width="auto")], className='my-1'),
             dbc.Row([dbc.Col(html.Div(id='sales-report-body'))]),
             html.P('https://sellercentral.amazon.com/sp-api-status')], 
