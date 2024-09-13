@@ -60,7 +60,10 @@ class AmzService:
             df = pd.json_normalize(sales.json()['payload'])
             return df
         else:
-            print('AMZ SP API status code: '+ str(sales.status_code))
+            print('AMZ SP API getSales() status code: '+ str(sales.status_code))
+            logging.error('AMZ SP API getSales() status code: '+ str(sales.status_code))
+            logging.error('access token: ' + access_token)
+            logging.error('params: ' + request_params)
             return pd.DataFrame()
     
 
@@ -95,6 +98,7 @@ class AmzService:
             return df
         else:
             print('AMZ SP API list Financial Events status code: '+ str(financialEvents.status_code))
+            logging.error('AMZ SP API getFinancialEvents() status code: '+ str(financialEvents.status_code))
             return pd.DataFrame()
         
 
@@ -126,9 +130,10 @@ class AmzService:
             print("Something failed on the Amazon SP API Inventory service call")
         
         if(inventorySummary is not None and inventorySummary.status_code == 200):
-            logging.info('AMZ SP API list Financial Events status code: ' + str(inventorySummary.status_code))
+            logging.info('AMZ SP API list inventory status code: ' + str(inventorySummary.status_code))
             df = pd.json_normalize(inventorySummary.json()['payload'])
             return df
         else:
-            print('AMZ SP API list Financial Events status code: '+ str(inventorySummary.status_code))
+            print('AMZ SP API list inventory status code: '+ str(inventorySummary.status_code))
+            logging.error('AMZ SP API getInventory() status code: '+ str(inventorySummary.status_code))
             return pd.DataFrame()
