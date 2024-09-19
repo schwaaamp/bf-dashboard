@@ -15,6 +15,9 @@
     # Reviews
         # Product Advertising API: https://webservices.amazon.com/paapi5/documentation/
         # Scratchpad: https://webservices.amazon.com/paapi5/scratchpad/index.html
+    # Aggregate reporting
+        # Sales comparison for 5 and 10 packs of same brand
+    # Organic search result ranking (catalog api?)
 
 # Bugs
     # Improve mobile formatting

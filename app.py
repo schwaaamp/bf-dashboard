@@ -66,12 +66,12 @@ def getSalesForToday():
     return html.H2('Today\'s Sales (US)'), dbc.Col([
             html.Div([
                 html.Div([
-                    html.H5(str('${:,.2f}'.format(df.get('Total Sales')[0]))),
+                    html.P(str('${:,.2f}'.format(df.get('Total Sales')[0]))),
                     html.P(str(df.get('Unit Count')[0]) + ' units'),
                     html.P(str(df.get('Order Count')[0]) + ' orders')
                 ])
             ], className='card-body')], 
-        className='card', style={'text-align':'center'})
+        className='card color-scale', style={'text-align':'center'})
 
 
 
@@ -91,18 +91,22 @@ def getSalesForDatesByAsin(start, end, asin, granularity):
             tempDf['ASIN'] = asin
             tempDf['Product'] = asinNames.get(asin)
             df = pd.concat([df, tempDf])
+            
+    print(df)
 
     if granularity == 'Week':
-        df = df.groupby(['Week', 'ASIN', 'Product'], observed=True)['Sales'].sum().reset_index()
+        df = df.groupby(['Week', 'ASIN', 'Product'], sort=False, observed=True)['Sales'].sum().reset_index()
     elif granularity == 'Month':
-        df = df.groupby(['Month', 'ASIN', 'Product'], observed=True)['Sales'].sum().reset_index()
+        df = df.groupby(['Month', 'ASIN', 'Product'], sort=False, observed=True)['Sales'].sum().reset_index()
         months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
         df['Month'] = pd.Categorical(df['Month'], categories=months, ordered=True)
         df.sort_values(by='Month', inplace=True)
     else:
         # Change from Day to Date for bar chart
         granularity = 'Date'
-
+    
+    print('=================================')
+    print(df)
     
     bar_chart = px.bar(df, x=granularity, y="Sales", color="Product", barmode="stack", template="minty")
     bar_chart.layout.xaxis.fixedrange = True

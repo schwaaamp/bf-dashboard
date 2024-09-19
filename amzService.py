@@ -27,9 +27,17 @@ class AmzService:
     #US ATVPDKIKX0DER
     #CA A2EUQ1WTGCTBG2
     #MX
+    
+    def refreshAccessToken():
+        self.access_token = token_reponse.json()["access_token"]
 
     # Postman: https://web.postman.co/workspace/My-Workspace~de12e46a-9cda-49b3-8350-c829508bdc38/request/15615900-7bc16135-483c-4bf8-9ed0-a07be598e199
     def getSales(self, asin, start, end, granularity):
+        
+        if self.access_token is None:
+            print("access token is none. refreshing...")
+            refreshAccessToken()
+        
         request_params = {
             "marketplaceIds": self.marketplace_id,
         }
@@ -61,9 +69,8 @@ class AmzService:
             return df
         else:
             print('AMZ SP API getSales() status code: '+ str(sales.status_code))
-            logging.error('AMZ SP API getSales() status code: '+ str(sales.status_code))
-            logging.error('access token: ' + access_token)
-            logging.error('params: ' + request_params)
+            print('AMZ SP API getSales() status code: '+ str(sales.status_code) + ' access token: ' + access_token + ' params: ' + request_params)
+            logging.error('AMZ SP API getSales() status code: '+ str(sales.status_code) + ' access token: ' + access_token + ' params: ' + request_params)
             return pd.DataFrame()
     
 

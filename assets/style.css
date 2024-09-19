@@ -1,3 +1,15 @@
+.color-scale {
+    animation: color-gradient 25s linear 1;
+    animation-fill-mode: forwards;
+    animation-play-state: paused;
+    width:100%;
+  }
+  
+  @keyframes color-gradient {
+    from { background: red; }
+    to   { background: blue; }
+  }
+
 .card-body{
     text-align: center;
     font-size: smaller;
