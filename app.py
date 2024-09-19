@@ -92,8 +92,6 @@ def getSalesForDatesByAsin(start, end, asin, granularity):
             tempDf['Product'] = asinNames.get(asin)
             df = pd.concat([df, tempDf])
             
-    print(df)
-
     if granularity == 'Week':
         df = df.groupby(['Week', 'ASIN', 'Product'], sort=False, observed=True)['Sales'].sum().reset_index()
     elif granularity == 'Month':
@@ -104,9 +102,6 @@ def getSalesForDatesByAsin(start, end, asin, granularity):
     else:
         # Change from Day to Date for bar chart
         granularity = 'Date'
-    
-    print('=================================')
-    print(df)
     
     bar_chart = px.bar(df, x=granularity, y="Sales", color="Product", barmode="stack", template="minty")
     bar_chart.layout.xaxis.fixedrange = True
