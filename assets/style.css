@@ -1,14 +1,14 @@
-.color-scale {
-    animation: color-gradient 25s linear 1;
-    animation-fill-mode: forwards;
-    animation-play-state: paused;
-    width:100%;
-  }
-  
-  @keyframes color-gradient {
-    from { background: red; }
-    to   { background: blue; }
-  }
+/* Color spectrum for today's sales */
+.bg-color-100{background-color: rgba(38, 166, 91, 0.1);}
+.bg-color-200{background-color: rgba(38, 166, 91, 0.2);}
+.bg-color-300{background-color: rgba(38, 166, 91, 0.3);}
+.bg-color-400{background-color: rgba(38, 166, 91, 0.4);}
+.bg-color-500{background-color: rgba(38, 166, 91, 0.5);}
+.bg-color-600{background-color: rgba(38, 166, 91, 0.6);}
+.bg-color-700{background-color: rgba(38, 166, 91, 0.7);}
+.bg-color-800{background-color: rgba(38, 166, 91, 0.8);}
+.bg-color-900{background-color: rgba(38, 166, 91, 0.9);}
+.bg-color-1000{background-color: rgba(38, 166, 91, 1.0);}
 
 .card-body{
     text-align: center;

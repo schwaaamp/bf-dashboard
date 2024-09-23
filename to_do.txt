@@ -18,6 +18,8 @@
     # Aggregate reporting
         # Sales comparison for 5 and 10 packs of same brand
     # Organic search result ranking (catalog api?)
+        # List pricing for first ~5 products in result Style
+        # Can I list ratings too?
 
 # Bugs
     # Improve mobile formatting

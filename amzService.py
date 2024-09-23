@@ -68,10 +68,8 @@ class AmzService:
             df = pd.json_normalize(sales.json()['payload'])
             return df
         else:
-            print('AMZ SP API getSales() status code: '+ str(sales.status_code))
-            print('AMZ SP API getSales() status code: '+ str(sales.status_code) + ' access token: ' + access_token + ' params: ' + request_params)
-            logging.error('AMZ SP API getSales() status code: '+ str(sales.status_code) + ' access token: ' + access_token + ' params: ' + request_params)
-            return pd.DataFrame()
+            logging.error('AMZ SP API getSales() status code: '+ str(sales.status_code) + ' access token: ' + self.access_token + ' params: ' + str(request_params))
+            raise ValueError(sales.status_code)
     
 
 

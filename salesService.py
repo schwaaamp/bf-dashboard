@@ -5,6 +5,7 @@ from pathlib import Path
 import pandas as pd
 from amzService import AmzService
 from asinSkuUtil import asinSkuMapper
+from asinNameUtil import asinNames
 
 
 class SalesService:
@@ -17,6 +18,25 @@ class SalesService:
             return self.getSalesByWeek(asin, start, end)
         else:
             print('Unexpected granularity type')
+            
+    # Moved this from app.py
+    # Look into refactoring
+    def getSalesForDatesByAsin(self, start, end, asin, granularity):
+        start = date.fromisoformat(start)
+        end = date.fromisoformat(end)
+        df = pd.DataFrame()
+        if asin != 'All':
+            df = self.getSales(asin, start, end, granularity)
+            df['ASIN'] = asin
+            df['Product'] = asinNames.get(asin)
+        else:
+            for asin in asinSkuMapper.keys():
+                tempDf = self.getSales(asin, start, end, granularity)
+                tempDf['ASIN'] = asin
+                tempDf['Product'] = asinNames.get(asin)
+                df = pd.concat([df, tempDf])
+        
+        return df
         
 
     
@@ -73,6 +93,10 @@ class SalesService:
 
 
     def getSalesFromAmz(self, asin, start, end, gran):
-        service = AmzService()
-        df = service.getSales(asin, start, end, gran)
+        try:
+            service = AmzService()
+            df = service.getSales(asin, start, end, gran)
+        except: 
+            service.refreshAccessToken()
+            df = service.getSales(asin, start, end, gran)
         return df

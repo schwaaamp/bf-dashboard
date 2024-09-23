@@ -15,6 +15,7 @@ from salesService import SalesService
 from inventoryService import InventoryService
 from flask import Flask, session
 import tkinter as tk
+import math
 
 salesService = SalesService()
 inventoryService = InventoryService()
@@ -62,6 +63,8 @@ def getSalesForToday():
     amzService = AmzService()
     df = amzService.getSales('', date.today(), date.today(), 'Day')
     df.columns = ['Day', 'Unit Count', 'Order Item Count', 'Order Count', 'Avg Unit Price', 'Currency', 'Total Sales', 'Currency2']
+    
+    bg_color = int(round(df.get('Total Sales')[0], -2))
 
     return html.H2('Today\'s Sales (US)'), dbc.Col([
             html.Div([
@@ -71,33 +74,19 @@ def getSalesForToday():
                     html.P(str(df.get('Order Count')[0]) + ' orders')
                 ])
             ], className='card-body')], 
-        className='card color-scale', style={'text-align':'center'})
+        className='card bg-color-'+str(bg_color), style={'text-align':'center'})
 
 
 
 # ===================== SALES BY ASIN BY DATE RANGE ==============================
-def getSalesForDatesByAsin(start, end, asin, granularity):
-    print('Getting sales for date picker...')
-    start = date.fromisoformat(start)
-    end = date.fromisoformat(end)
-    df = pd.DataFrame()
-    if asin != 'All':
-        df = salesService.getSales(asin, start, end, granularity)
-        df['ASIN'] = asin
-        df['Product'] = asinNames.get(asin)
-    else:
-        for asin in asinSkuMapper.keys():
-            tempDf = salesService.getSales(asin, start, end, granularity)
-            tempDf['ASIN'] = asin
-            tempDf['Product'] = asinNames.get(asin)
-            df = pd.concat([df, tempDf])
+def getSalesForDatePicker(start, end, asin, granularity):
+    df = salesService.getSalesForDatesByAsin(start, end, asin, granularity)
             
     if granularity == 'Week':
         df = df.groupby(['Week', 'ASIN', 'Product'], sort=False, observed=True)['Sales'].sum().reset_index()
     elif granularity == 'Month':
         df = df.groupby(['Month', 'ASIN', 'Product'], sort=False, observed=True)['Sales'].sum().reset_index()
-        months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-        df['Month'] = pd.Categorical(df['Month'], categories=months, ordered=True)
+        df['Month'] = pd.Categorical(df['Month'], categories=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], ordered=True)
         df.sort_values(by='Month', inplace=True)
     else:
         # Change from Day to Date for bar chart
@@ -191,7 +180,7 @@ app.layout = html.H1(children='Amazon Sales'), html.Div([
     Input('granularity-dd', 'value'))
 def update_output(start_date, end_date, asin, granularity):
     if start_date is not None and end_date is not None:
-        return getSalesForDatesByAsin(start_date, end_date, asin, granularity)
+        return getSalesForDatePicker(start_date, end_date, asin, granularity)
     else:
         return ''
     
