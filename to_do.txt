@@ -40,3 +40,7 @@ Management
     # Competitor ASINS
     # Competitor reviews
     # My reviews
+
+# Refactor
+    # app.py should be only dash components and front end
+        # Dash challenge winner: https://github.com/mayaradaher/challenge-Amazon/blob/main/app.py

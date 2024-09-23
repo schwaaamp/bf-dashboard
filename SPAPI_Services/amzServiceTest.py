@@ -1,7 +1,7 @@
 import datetime as date
 import json
 import pandas as pd
-from amzService import AmzService
+from SPAPI_Services.amzService import AmzService
 from utils import utils
 
 
@@ -34,3 +34,4 @@ print(sales8weeks)
 print(avg)
 assert len(sales.index) == 1
 assert len(sales8weeks.index) == 8
+

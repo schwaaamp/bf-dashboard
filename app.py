@@ -7,15 +7,16 @@ import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
 import pandas as pd
 import plotly.express as px
-from amzService import AmzService
+from SPAPI_Services.amzService import AmzService
 from asinSkuUtil import asinSkuMapper
 from asinNameUtil import asinNames
 from credentials import credentials
-from salesService import SalesService
-from inventoryService import InventoryService
+from SPAPI_Services.salesService import SalesService
+from SPAPI_Services.inventoryService import InventoryService
 from flask import Flask, session
 import tkinter as tk
 import math
+from utils.functions import create_card
 
 salesService = SalesService()
 inventoryService = InventoryService()
@@ -65,16 +66,24 @@ def getSalesForToday():
     df.columns = ['Day', 'Unit Count', 'Order Item Count', 'Order Count', 'Avg Unit Price', 'Currency', 'Total Sales', 'Currency2']
     
     bg_color = int(round(df.get('Total Sales')[0], -2))
+    
+    return dbc.Row(
+        [
+            dbc.Col(create_card('Sales', 'sales-card', 'fa-sack-dollar', str('${:,.2f}'.format(df.get('Total Sales')[0]))), width=4,),
+            dbc.Col(create_card('Units', 'units-card', 'fa-tag', df.get('Unit Count')[0]), width=4,),
+            dbc.Col(create_card('Orders', 'orders-card', 'fa-bag-shopping', df.get('Order Count')[0]), width=4,),
+        ]
+    )
 
-    return html.H2('Today\'s Sales (US)'), dbc.Col([
-            html.Div([
-                html.Div([
-                    html.P(str('${:,.2f}'.format(df.get('Total Sales')[0]))),
-                    html.P(str(df.get('Unit Count')[0]) + ' units'),
-                    html.P(str(df.get('Order Count')[0]) + ' orders')
-                ])
-            ], className='card-body')], 
-        className='card bg-color-'+str(bg_color), style={'text-align':'center'})
+    #return html.H2('Today\'s Sales (US)'), dbc.Col([
+    #        html.Div([
+    #            html.Div([
+    #                html.P(str('${:,.2f}'.format(df.get('Total Sales')[0]))),
+    #                html.P(str(df.get('Unit Count')[0]) + ' units'),
+    #                html.P(str(df.get('Order Count')[0]) + ' orders')
+    #            ])
+    #        ], className='card-body')], 
+    #    className='card bg-color-'+str(bg_color), style={'text-align':'center'})
 
 
 
@@ -139,7 +148,7 @@ def getInventory():
 
 # ===================== Initialize the app ==============================
 load_figure_template("minty")
-app = Dash(__name__, external_stylesheets=[dbc.themes.MINTY], suppress_callback_exceptions=True)
+app = Dash(__name__, external_stylesheets=[dbc.themes.MINTY, dbc.icons.FONT_AWESOME], suppress_callback_exceptions=True)
 server = app.server
 auth = dash_auth.BasicAuth(
     app,
@@ -152,8 +161,8 @@ asinDD = asinSkuMapper.copy()
 asinDD["All"] = ["All", "All"]
 
 app.layout = html.H1(children='Amazon Sales'), html.Div([
+    getSalesForToday(),
         dbc.Row([
-            html.Div(getSalesForToday(), className='col-sm'),
             html.Div(dbc.Row(show_averages()), className='col-sm'), 
             html.Div([html.H2('Inventory needs'), getInventory()], className='col-sm')], className='my-1'),
             dbc.Row(dbc.Col(html.H2('Product Sales'))),

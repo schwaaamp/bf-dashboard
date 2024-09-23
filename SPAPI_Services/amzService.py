@@ -142,3 +142,36 @@ class AmzService:
             print('AMZ SP API list inventory status code: '+ str(inventorySummary.status_code))
             logging.error('AMZ SP API getInventory() status code: '+ str(inventorySummary.status_code))
             return pd.DataFrame()
+        
+        
+        
+        
+    def getCatalogItems(self, keywords):
+        request_params = {
+            "marketplaceIds": self.marketplace_id,
+            "keywords": keywords,
+        }
+
+        logging.info('Calling AMZ for ' + str(request_params))
+
+        try:
+            inventorySummary = requests.get(
+                self.endpoint + "/catalog/2022-04-01/items"
+                + "?"
+                + urllib.parse.urlencode(request_params),
+                headers={
+                    "x-amz-access-token": self.access_token,
+                },
+            )
+        except:
+            print("Something failed on the Amazon SP API Catalog service call")
+        
+        if(inventorySummary is not None and inventorySummary.status_code == 200):
+            logging.info('AMZ SP API searchCatalogItems status code: ' + str(inventorySummary.status_code))
+            df = pd.json_normalize(inventorySummary.json())
+            return df
+        else:
+            print('AMZ SP API searchCatalogItems status code: '+ str(inventorySummary.status_code))
+            logging.error('AMZ SP API getInventory() status code: '+ str(inventorySummary.status_code))
+            return pd.DataFrame()
+        
