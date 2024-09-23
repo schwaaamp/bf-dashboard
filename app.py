@@ -13,6 +13,7 @@ from asinNameUtil import asinNames
 from credentials import credentials
 from SPAPI_Services.salesService import SalesService
 from SPAPI_Services.inventoryService import InventoryService
+from SPAPI_Services.catalogService import CatalogService
 from flask import Flask, session
 import tkinter as tk
 import math
@@ -75,16 +76,6 @@ def getSalesForToday():
         ]
     )
 
-    #return html.H2('Today\'s Sales (US)'), dbc.Col([
-    #        html.Div([
-    #            html.Div([
-    #                html.P(str('${:,.2f}'.format(df.get('Total Sales')[0]))),
-    #                html.P(str(df.get('Unit Count')[0]) + ' units'),
-    #                html.P(str(df.get('Order Count')[0]) + ' orders')
-    #            ])
-    #        ], className='card-body')], 
-    #    className='card bg-color-'+str(bg_color), style={'text-align':'center'})
-
 
 
 # ===================== SALES BY ASIN BY DATE RANGE ==============================
@@ -143,6 +134,31 @@ def getInventory():
     return dbc.Col(grid, className='col-sm')
 
 
+# ===================== Show organic search results for terms ==============================
+def showOragnicSearch():
+    catalogService = CatalogService()
+    df = catalogService.getSearchResults()
+      
+    columnDefs = [
+        { 'field': 'ASIN'},
+        { 'field': 'Brand'},
+        { 'field': 'Item Name'},
+    ]
+    
+    grid = dag.AgGrid(
+        id="organicSearch",
+        rowData=df.to_dict("records"),
+        columnDefs=columnDefs,
+        columnSize="autoSize",
+    )
+    
+    return dbc.Row(
+        [
+            dbc.Col(grid),
+        ]
+    )
+
+
 
 
 
@@ -177,6 +193,7 @@ app.layout = html.H1(children='Amazon Sales'), html.Div([
                 dbc.Col([dcc.Dropdown(list(asinDD.keys()), 'All', id='asin-dd', clearable=False, style={'width':'130px'})], width="auto"),
                 dbc.Col([dcc.Dropdown(['Day', 'Week', 'Month'], 'Week', id='granularity-dd', clearable=False, style={'width':'100px'})], width="auto")], className='my-1'),
             dbc.Row([dbc.Col(html.Div(id='sales-report-body'))]),
+            showOragnicSearch(),
             html.P('https://sellercentral.amazon.com/sp-api-status')], 
         className='container')
 

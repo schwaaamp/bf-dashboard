@@ -20,6 +20,7 @@
     # Organic search result ranking (catalog api?)
         # List pricing for first ~5 products in result Style
         # Can I list ratings too?
+        # Perhaps this can be a card at the top
 
 # Bugs
     # Improve mobile formatting
