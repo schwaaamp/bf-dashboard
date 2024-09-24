@@ -1,8 +1,8 @@
 
 from datetime import date, timedelta
 import pandas as pd
-from SPAPI_Services.amzService import AmzService
-from SPAPI_Services.salesService import SalesService
+from SPAPI.amzService import AmzService
+from SPAPI.salesService import SalesService
 
 class InventoryService:
 

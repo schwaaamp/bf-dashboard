@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from SPAPI_Services.amzService import AmzService
+from SPAPI.amzService import AmzService
 
 # Test getting financial events for yesterday
 service = AmzService()

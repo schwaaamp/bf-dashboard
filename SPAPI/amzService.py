@@ -3,7 +3,7 @@ import logging
 import pandas as pd
 import requests
 import urllib.parse
-from credentials import credentials
+from SPAPI.SPAPI_credentials import credentials
 
 class AmzService:
 
