@@ -7,17 +7,18 @@ import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
 import pandas as pd
 import plotly.express as px
-from SPAPI_Services.amzService import AmzService
+from SPAPIServices.amzService import AmzService
 from asinSkuUtil import asinSkuMapper
 from asinNameUtil import asinNames
 from credentials import credentials
-from SPAPI_Services.salesService import SalesService
-from SPAPI_Services.inventoryService import InventoryService
-from SPAPI_Services.catalogService import CatalogService
+from SPAPIServices.salesService import SalesService
+from SPAPIServices.inventoryService import InventoryService
+from SPAPIServices.catalogService import CatalogService
 from flask import Flask, session
 import tkinter as tk
 import math
 from utils.functions import create_card
+import json
 
 salesService = SalesService()
 inventoryService = InventoryService()
@@ -60,7 +61,6 @@ def show_averages():
 
 
 # ===================== TODAY'S SALES ==============================
-# Separate function from sales by asin because this should not be cached
 def getSalesForToday():
     amzService = AmzService()
     df = amzService.getSales('', date.today(), date.today(), 'Day')
@@ -135,7 +135,7 @@ def getInventory():
 
 
 # ===================== Show organic search results for terms ==============================
-def showOragnicSearch():
+def showOrganicSearch():
     catalogService = CatalogService()
     df = catalogService.getSearchResults()
       
@@ -152,9 +152,21 @@ def showOragnicSearch():
         columnSize="autoSize",
     )
     
+    rankings = pd.DataFrame(columns=['ASIN', 'Ranking'])
+    
+    for asin in asinSkuMapper.keys():
+        rankings = pd.concat([rankings, df.loc[df['ASIN'] == asin]])
+        
+    lgis = []
+    for r in rankings.iterrows():
+        lgis.append(dbc.ListGroupItem(str(r[1]['Ranking']) + " " + r[1]['ASIN']))
+    
+    list_group = dbc.ListGroup(lgis)
+    
     return dbc.Row(
         [
             dbc.Col(grid),
+            dbc.Col(create_card('Organic Search Ranking', 'ranking-card', 'fa-medal', list_group), width=4,)
         ]
     )
 
@@ -193,7 +205,7 @@ app.layout = html.H1(children='Amazon Sales'), html.Div([
                 dbc.Col([dcc.Dropdown(list(asinDD.keys()), 'All', id='asin-dd', clearable=False, style={'width':'130px'})], width="auto"),
                 dbc.Col([dcc.Dropdown(['Day', 'Week', 'Month'], 'Week', id='granularity-dd', clearable=False, style={'width':'100px'})], width="auto")], className='my-1'),
             dbc.Row([dbc.Col(html.Div(id='sales-report-body'))]),
-            showOragnicSearch(),
+            showOrganicSearch(),
             html.P('https://sellercentral.amazon.com/sp-api-status')], 
         className='container')
 

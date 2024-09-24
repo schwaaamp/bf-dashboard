@@ -156,7 +156,7 @@ cython_debug/
 
 # AMZ SP API Credentials
 credentials.py
-SPAPI_Services/SPAPI_credentials.py
+SPAPIServices/SPAPI_credentials.py
 #__pycache__/credentials.cpython-39.pyc
 
 # AMZ ASIN to SKU map
@@ -164,7 +164,7 @@ asinSkuUtil.py
 asinNameUtil.py
 utilsTest.py
 utils/searchTerms.py
-SPAPI_Services/searchTermsUtil.py
+SPAPIServices/searchTermsUtil.py
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
