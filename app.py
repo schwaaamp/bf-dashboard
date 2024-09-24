@@ -18,8 +18,6 @@ from flask import Flask, session
 import tkinter as tk
 import math
 from utils.functions import create_card
-import json
-import json
 
 salesService = SalesService()
 inventoryService = InventoryService()
@@ -66,9 +64,6 @@ def getSalesForToday():
     amzService = AmzService()
     df = amzService.getSales('', date.today(), date.today(), 'Day')
     df.columns = ['Day', 'Unit Count', 'Order Item Count', 'Order Count', 'Avg Unit Price', 'Currency', 'Total Sales', 'Currency2']
-    print(df)
-    
-    bg_color = int(round(df.get('Total Sales')[0], -2))
     
     return dbc.Row(
         [
@@ -207,7 +202,6 @@ app.layout = html.H1(children='Amazon Sales'), html.Div([
                 dbc.Col([dcc.Dropdown(list(asinDD.keys()), 'All', id='asin-dd', clearable=False, style={'width':'130px'})], width="auto"),
                 dbc.Col([dcc.Dropdown(['Day', 'Week', 'Month'], 'Week', id='granularity-dd', clearable=False, style={'width':'100px'})], width="auto")], className='my-1'),
             dbc.Row([dbc.Col(html.Div(id='sales-report-body'))]),
-            showOrganicSearch(),
             showOrganicSearch(),
             html.P('https://sellercentral.amazon.com/sp-api-status')], 
         className='container')
