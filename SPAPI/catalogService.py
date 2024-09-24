@@ -2,7 +2,7 @@ from datetime import date, timedelta
 import pandas as pd
 import numpy as np
 from SPAPI.amzService import AmzService
-from SPAPI.searchTermsUtil import searchTerms
+from utils.searchTerms import searchTerms
 
 class CatalogService:
     

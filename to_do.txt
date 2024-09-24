@@ -3,14 +3,14 @@
 # Reports
     # Get sales from the month prior and overlay bar graph
     # Get sales from 1 year prior and overlay bar graph
-    # profit yesterday
-        # look into finance reports
-        # where are ads / ppc? https://advertising.amazon.com/about-api
     # Modify show_averages() to use getSalesByWeek()
     # Competition pricing and sales (if possible)
         # Pricing API {{baseUrl}}/products/pricing/v0/competitivePrice?MarketplaceId=ATVPDKIKX0DER&Asins=B0CKVN852J&ItemType=Asin&CustomerType=Consumer
     # Storage fees by month
     # Profitability
+        # yesterday
+        # 2 week pay period accounting for PPC expenses per ASIN
+        # where are ads / ppc? https://advertising.amazon.com/about-api
     # FBA Shipments not matching (shipped vs received)
     # Reviews
         # Product Advertising API: https://webservices.amazon.com/paapi5/documentation/
