@@ -157,6 +157,7 @@ cython_debug/
 # AMZ SP API Credentials
 credentials.py
 SPAPIServices/SPAPI_credentials.py
+SPAPI/SPAPI_credentials.py
 #__pycache__/credentials.cpython-39.pyc
 
 # AMZ ASIN to SKU map
