@@ -1,11 +1,10 @@
 # TODO
 
 # Reports
-    # Get sales from the month prior and overlay bar graph
-    # Get sales from 1 year prior and overlay bar graph
-    # Modify show_averages() to use getSalesByWeek()
     # Competition pricing and sales (if possible)
         # Pricing API {{baseUrl}}/products/pricing/v0/competitivePrice?MarketplaceId=ATVPDKIKX0DER&Asins=B0CKVN852J&ItemType=Asin&CustomerType=Consumer
+        # https://docs.python.org/3/howto/urllib2.html
+            # Retrieve reviews and pricing for each of the asins in the organic search results; store and retrieve 1/week? 1/day?
     # Storage fees by month
     # Profitability
         # yesterday
@@ -15,12 +14,21 @@
     # Reviews
         # Product Advertising API: https://webservices.amazon.com/paapi5/documentation/
         # Scratchpad: https://webservices.amazon.com/paapi5/scratchpad/index.html
-    # Aggregate reporting
-        # Sales comparison for 5 and 10 packs of same brand
+        # Does not return product review data, only a link to the product listing
+        # https://www.canopyapi.co/
     # Organic search result ranking (catalog api?)
         # List pricing for first ~5 products in result Style
         # Can I list ratings too?
         # Perhaps this can be a card at the top
+    # Sales
+        # Get sales from the month prior and overlay bar graph
+        # Get sales from 1 year prior and overlay bar graph
+        # Aggregate 5 and 10 packs of same brand
+    # Inventory
+        # Products
+        # Labels
+        # Inserts
+
 
 # Bugs
     # Improve mobile formatting
@@ -34,14 +42,14 @@ Cache
 Style
     # Change to Dash layout to improve mobile view: https://dash-bootstrap-components.opensource.faculty.ai/docs/components/layout/
 
-Management
-    # Profitability per SKU/ASIN
-    # Bag count, label count, insert count
-    # Tell me when to order more of the above
-    # Competitor ASINS
-    # Competitor reviews
-    # My reviews
 
 # Refactor
     # app.py should be only dash components and front end
         # Dash challenge winner: https://github.com/mayaradaher/challenge-Amazon/blob/main/app.py
+    # Add pages
+        # Sales
+        # Competition
+        # Inventory?
+    # Address all of the util files
+        # Combine?
+        # ENV files?

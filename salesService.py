@@ -3,7 +3,7 @@ import datetime
 from datetime import date, timedelta
 from pathlib import Path
 import pandas as pd
-from SPAPI.amzService import AmzService
+from amzService import AmzService
 from asinSkuUtil import asinSkuMapper
 from asinNameUtil import asinNames
 
