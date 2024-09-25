@@ -8,28 +8,36 @@ from credentials import credentials
 class AmzService:
 
     # Get Sales data from AMZ
-    # Getting LWA access token using the app credentials. Valid for 1 hour until it expires
-    token_response = requests.post(
-        "https://api.amazon.com/auth/o2/token",
-        data={
-            "grant_type": "refresh_token",
-            "refresh_token": credentials["refresh_token"],
-            "client_id": credentials["lwa_app_id"],
-            "client_secret": credentials["lwa_client_secret"],
-        },
-    )
+    token_response = ''
+    endpoint = ''
+    marketplaceId = ''
+    access_token = ''
+    
+    def __init__(self):
+        # Getting LWA access token using the app credentials. Valid for 1 hour until it expires
+        self.token_response = requests.post(
+            "https://api.amazon.com/auth/o2/token",
+            data={
+                "grant_type": "refresh_token",
+                "refresh_token": credentials["refresh_token"],
+                "client_id": credentials["lwa_app_id"],
+                "client_secret": credentials["lwa_client_secret"],
+            },
+        )
+        
+        self.access_token = self.token_response.json()["access_token"]
 
-    access_token = token_response.json()["access_token"]
-
-    #NA endpoint
-    endpoint = "https://sellingpartnerapi-na.amazon.com"
-    marketplace_id = "ATVPDKIKX0DER"
-    #US ATVPDKIKX0DER
-    #CA A2EUQ1WTGCTBG2
-    #MX
+        #NA endpoint
+        self.endpoint = "https://sellingpartnerapi-na.amazon.com"
+        self.marketplace_id = "ATVPDKIKX0DER"
+        #US ATVPDKIKX0DER
+        #CA A2EUQ1WTGCTBG2
+        #MX
+        
+        
     
     def refreshAccessToken(self):
-        self.access_token = token_reponse.json()["access_token"]
+        self.access_token = self.token_reponse.json()["access_token"]
 
     # Postman: https://web.postman.co/workspace/My-Workspace~de12e46a-9cda-49b3-8350-c829508bdc38/request/15615900-7bc16135-483c-4bf8-9ed0-a07be598e199
     def getSales(self, asin, start, end, granularity):
