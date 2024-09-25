@@ -28,7 +28,7 @@ class AmzService:
     #CA A2EUQ1WTGCTBG2
     #MX
     
-    def refreshAccessToken():
+    def refreshAccessToken(self):
         self.access_token = token_reponse.json()["access_token"]
 
     # Postman: https://web.postman.co/workspace/My-Workspace~de12e46a-9cda-49b3-8350-c829508bdc38/request/15615900-7bc16135-483c-4bf8-9ed0-a07be598e199
