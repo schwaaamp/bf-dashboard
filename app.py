@@ -41,7 +41,7 @@ sidebar = html.Div(
         dbc.Nav(
             [
                 dbc.NavLink(
-                    "Sales", href="/sales", active="exact"
+                    "Sales", href="/sales", active="exact", className='nav-sales'
                 ),
                 dbc.NavLink(
                     "Competition",
@@ -54,25 +54,6 @@ sidebar = html.Div(
             ],
             vertical=True,
             pills=True,
-        ),
-        html.Div(
-            [
-                html.Span("Created by "),
-                html.A(
-                    "Mayara Daher",
-                    href="https://github.com/mayaradaher",
-                    target="_blank",
-                ),
-                html.Br(),
-                html.Span("Data Source "),
-                html.A(
-                    "MIT Publication",
-                    href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/YGLYDY",
-                    target="_blank",
-                ),
-            ],
-            className="subtitle-sidebar",
-            style={"position": "absolute", "bottom": "10px", "width": "100%"},
         ),
     ],
     className="sidebar",
@@ -88,7 +69,7 @@ app.layout = html.Div(
     [
         dcc.Location(id="url", pathname="/sales"),
         sidebar,
-        content,
+        #content,
         dash.page_container,
     ]
 )

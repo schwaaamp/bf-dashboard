@@ -11,3 +11,4 @@ pandas
 plotly
 Flask
 gunicorn
+multipledispatch==1.0.0

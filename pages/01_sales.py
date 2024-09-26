@@ -33,9 +33,9 @@ def getSalesForToday():
     
     return dbc.Row(
         [
-            dbc.Col(create_card('Sales', 'sales-card', 'fa-sack-dollar', str('${:,.2f}'.format(df.get('Total Sales')[0]))), width=4,),
-            dbc.Col(create_card('Units', 'units-card', 'fa-tag', df.get('Unit Count')[0]), width=4,),
-            dbc.Col(create_card('Orders', 'orders-card', 'fa-bag-shopping', df.get('Order Count')[0]), width=4,),
+            dbc.Col(create_card('Sales', 'sales-card', 'fa-sack-dollar', str('${:,.2f}'.format(df.get('Total Sales')[0]))), style={'padding':'3px'}, className='sales-card-col'),
+            dbc.Col(create_card('Units', 'units-card', 'fa-tag', df.get('Unit Count')[0]), style={'padding':'3px'}),
+            dbc.Col(create_card('Orders', 'orders-card', 'fa-bag-shopping', df.get('Order Count')[0]), style={'padding':'3px'}),
         ]
     )
 

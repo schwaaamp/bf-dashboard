@@ -10,7 +10,7 @@ class AmzService:
     # Get Sales data from AMZ
     token_response = ''
     endpoint = ''
-    marketplaceId = ''
+    marketplace_id = ''
     access_token = ''
     
     def __init__(self):
@@ -183,3 +183,37 @@ class AmzService:
             logging.error('AMZ SP API getInventory() status code: '+ str(inventorySummary.status_code))
             return pd.DataFrame()
         
+        
+        
+        
+        
+    def getPricing(self, asins):
+        request_params = {
+            "MarketplaceId": self.marketplace_id,
+            "Asins": asins, #list of up to 20 asins
+            "ItemType":'Asin',
+            
+        }
+
+        logging.info('Calling AMZ for ' + str(request_params))
+
+        try:            
+            pricing = requests.get(
+                self.endpoint + "/products/pricing/v0/price"
+                + "?"
+                + urllib.parse.urlencode(request_params),
+                headers={
+                    "x-amz-access-token": self.access_token,
+                },
+            )
+        except:
+            print("Something failed on the Amazon SP API Price service call")
+        
+        if(pricing is not None and pricing.status_code == 200):
+            logging.info('AMZ SP API getPricing status code: ' + str(pricing.status_code))
+            df = pd.json_normalize(pricing.json()['payload'])
+            return df
+        else:
+            print('AMZ SP API getPricing status code: '+ str(pricing.status_code) + pricing.reason)
+            logging.error('AMZ SP API getPricing() status code: '+ str(pricing.status_code) + pricing.reason)
+            return pd.DataFrame()

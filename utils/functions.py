@@ -16,11 +16,12 @@ def create_card(title, card_id, icon_class, children):
                     ],
                     className="d-flex align-items-center",
                 ),
-                html.H4(id=card_id, children=children),
+                html.H4(children=children),
             ],
             className="card-body",
         ),
         className="card",
+        id=card_id,
     )
     
 def getSkuForAsin(self, asin):

@@ -109,13 +109,24 @@ body {
 }
 
 @media (max-width: 768px) {
+    body{
+        margin-left: 8rem;
+    }
 
     .sidebar {
-        width: 12rem;
+        width: 8rem;
     }
 
     .content {
-        margin-left: calc(12rem + 1rem);
+        margin-left: calc(8rem + 1rem);
+    }
+
+    .nav-pills .nav-link {
+        padding: 3px;
+    }
+
+    .sales-card-col{
+        flex: 1 0 100%;
     }
 }
 
@@ -126,7 +137,7 @@ body {
 }
 
 .sidebar-logo img {
-    height: 40px;
+    height: 70px;
     width: auto;
 }
 
