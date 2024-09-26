@@ -1,7 +1,6 @@
 from pricingService import PricingService
 from amzService import AmzService
 import pandas as pd
-import numpy as np
 
 # Need to split asins into lists of 20 then combine the results
 amzService = AmzService()

@@ -38,6 +38,25 @@ def showOrganicSearch():
         columnSize="autoSize",
     )
     
+    #Query":[term],"ASIN":[asin], "Item Name":[itemName], "Brand":[brandName], "Ranking":[ranking]
+    
+    # ned to make array of only search terms to iterate over and compare. Make an array of chldren fro each one and append to its own wrapper div
+    
+    previousTerm = df['Query'].values[0]
+    d = html.Div()
+    children = []
+    title = ''
+    for index, row in df.iterrows():
+        searchTerm = row['Query']
+        if searchTerm == previousTerm:
+            title = searchTerm
+            children.append(html.P(str(row['ASIN']) + ' ' + str(row['Listing Price'])))
+            previousTerm = searchTerm
+        else:
+            wrapperDiv = html.Div([html.H3(title), html.Div(children)])
+    d = wrapperDiv
+    
+    wrapperCol = dbc.Col(d)
     rankings = pd.DataFrame(columns=['ASIN', 'Ranking'])
     
     for asin in asinSkuMapper.keys():
@@ -57,7 +76,8 @@ def showOrganicSearch():
     return dbc.Row(
         [
             dbc.Col(grid),
-            dbc.Col(create_card('Organic Search Ranking', 'ranking-card', 'fa-medal', list_group), width=4,)
+            dbc.Col(create_card('Organic Search Ranking', 'ranking-card', 'fa-medal', list_group), ),
+            wrapperCol,
         ]
     )
 

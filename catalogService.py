@@ -26,13 +26,30 @@ class CatalogService:
                 asins.append(asin)
                 itemName = item['summaries'][0]['itemName']
                 brandName = item['summaries'][0]['brand']
-                record = pd.DataFrame({"ASIN":[asin], "Item Name":[itemName], "Brand":[brandName], "Ranking":[ranking]})
+                record = pd.DataFrame({"Query":[term],"ASIN":[asin], "Item Name":[itemName], "Brand":[brandName], "Ranking":[ranking]})
                 df = pd.concat([df, record])
         
-        # Call pricing service to get pricing for the asins[]. Append to df before returning
-        #prices = pricingService.getPricingByAsin(asins)
-        #print('PRICING DF: ' + prices)
+        # remove dupes in asin list
+        asins = list(set(asins))
         
+        # Call pricing service to get pricing for the asins[]. Append to df before returning
+        pricingDf = pricingService.getPricingByAsin(asins)
+        
+        #iterate through df, find price from pricingDf, add values to new dataframe
+        df.reset_index()
+        pricingDf.reset_index()
+        prices = []
+        categoryRankings = []
+        
+        for index, row in df.iterrows():
+            record = pricingDf.loc[pricingDf['ASIN'] == row['ASIN']]
+            price = record['ListingPrice'][0]
+            categoryRank = record['SalesRanking']
+            prices.append(price)
+            categoryRankings.append(categoryRank)
+        
+        df['Listing Price'] = prices
+        df['Category Rank'] = categoryRankings
         return df
     
     def getOrganicSearchRanking(self, df, term):
