@@ -199,7 +199,7 @@ class AmzService:
 
         try:            
             pricing = requests.get(
-                self.endpoint + "/products/pricing/v0/price"
+                self.endpoint + "/products/pricing/v0/competitivePrice"
                 + "?"
                 + urllib.parse.urlencode(request_params),
                 headers={

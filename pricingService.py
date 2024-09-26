@@ -10,7 +10,7 @@ class PricingService:
         for asin in asins:
             a += asin + ','
         
-        a = a[:-1]  
+        a = a[:-1]
         print(a)
         df = amzService.getPricing(a)
         print(df)
