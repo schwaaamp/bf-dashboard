@@ -40,6 +40,7 @@ class CatalogService:
         pricingDf.reset_index()
         prices = []
         categoryRankings = []
+        listingLinks = []
         
         for index, row in df.iterrows():
             record = pricingDf.loc[pricingDf['ASIN'] == row['ASIN']]
@@ -47,10 +48,18 @@ class CatalogService:
             categoryRank = record['SalesRanking']
             prices.append(price)
             categoryRankings.append(categoryRank)
+            #add link to listing as column
+            listingLinks.append('https://www.amazon.com/dp/' + row['ASIN'])
         
         df['Listing Price'] = prices
         df['Category Rank'] = categoryRankings
-        return df
+        df['Link'] = listingLinks
+        
+        df_list = []
+        for term in searchTerms.values():
+            trimmedDf = df[df['Query'] == term]
+            df_list.append(trimmedDf)
+        return df_list
     
     def getOrganicSearchRanking(self, df, term):
         return np.where(ASIN == term)

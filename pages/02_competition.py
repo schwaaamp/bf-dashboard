@@ -23,40 +23,38 @@ warnings.filterwarnings("ignore")
 # ===================== Show organic search results for terms ==============================
 def showOrganicSearch():
     catalogService = CatalogService()
-    df = catalogService.getSearchResults()
-      
+    df_list = catalogService.getSearchResults()
+    
     columnDefs = [
-        { 'field': 'ASIN'},
+        #{ 'field': 'ASIN'},
+        { 'field': 'Ranking', 'headerName':'#'},
         { 'field': 'Brand'},
-        { 'field': 'Item Name'},
+        { 'field': 'Listing Price', "valueFormatter": {"function": "'$' + (params.value ? params.value : 0)"},},
+        { 'field': 'Category Rank'},
+        { 'field': 'Link', 'headerName':'Listing', "linkTarget":"_blank"},
     ]
+
+    # for each df, create a div of results and append to row
+    df_col = []
     
-    grid = dag.AgGrid(
-        id="organicSearch",
-        rowData=df.to_dict("records"),
-        columnDefs=columnDefs,
-        columnSize="autoSize",
-    )
-    
-    #Query":[term],"ASIN":[asin], "Item Name":[itemName], "Brand":[brandName], "Ranking":[ranking]
-    
-    # ned to make array of only search terms to iterate over and compare. Make an array of chldren fro each one and append to its own wrapper div
-    
-    previousTerm = df['Query'].values[0]
-    d = html.Div()
-    children = []
-    title = ''
-    for index, row in df.iterrows():
-        searchTerm = row['Query']
-        if searchTerm == previousTerm:
-            title = searchTerm
-            children.append(html.P(str(row['ASIN']) + ' ' + str(row['Listing Price'])))
-            previousTerm = searchTerm
-        else:
-            wrapperDiv = html.Div([html.H3(title), html.Div(children)])
-    d = wrapperDiv
-    
-    wrapperCol = dbc.Col(d)
+    for df in df_list:
+        children = []
+        wrapperDiv = []
+        grid = dag.AgGrid(
+            id="organicSearch",
+            rowData=df.to_dict("records"),
+            columnDefs=columnDefs,
+            columnSize="autoSize",
+            defaultColDef={"cellRenderer": "markdown"},
+        )
+        
+        wrapperDiv = html.Div([html.H3(df['Query'].values[0]), html.Div(grid)], className='col-lg-6')
+        df_col.append(wrapperDiv)
+        
+    searchRow = dbc.Row(df_col)
+        
+
+    '''
     rankings = pd.DataFrame(columns=['ASIN', 'Ranking'])
     
     for asin in asinSkuMapper.keys():
@@ -72,14 +70,9 @@ def showOrganicSearch():
         lgis.append(dbc.ListGroupItem(str(r[1]['Ranking']) + "      " + asinNames.get(r[1]['ASIN']), class_name=decorator))
     
     list_group = dbc.ListGroup(lgis, flush=True,)
-    
-    return dbc.Row(
-        [
-            dbc.Col(grid),
-            dbc.Col(create_card('Organic Search Ranking', 'ranking-card', 'fa-medal', list_group), ),
-            wrapperCol,
-        ]
-    )
+    '''
+    #return dbc.Row([dbc.Col(grid), dbc.Col(create_card('Organic Search Ranking', 'ranking-card', 'fa-medal', list_group), ),]), searchRow
+    return searchRow
 
 
 # layout

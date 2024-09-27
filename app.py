@@ -7,8 +7,6 @@ from dash_bootstrap_templates import load_figure_template
 from credentials import credentials
 from flask import Flask, session
 
-#inventoryService = InventoryService()
-
 
 
 

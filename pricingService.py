@@ -27,12 +27,12 @@ class PricingService:
             for record in recordList:
                 asin = record[0]
                 status = record[1]
-                listingPrice = ''
+                listingPrice = 0.0
                 
                 for p in range(len(record[2])):
                     condition =  record[2][p]['condition']
                     if condition == 'New':
-                        listingPrice = str(record[2][p]['Price']['ListingPrice']['Amount'])
+                        listingPrice = record[2][p]['Price']['ListingPrice']['Amount']
                         
                 
                 categoryRank = record[3][1]['Rank']
