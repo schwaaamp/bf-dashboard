@@ -82,7 +82,8 @@ class AmzService:
 
 
 
-
+    # believe this needs to get the financial events for the active financial events group id
+    # this might be useful for figuring out what i made yesterday
 
     def getFinancialEvents(self, start, end):
         request_params = {}
@@ -113,7 +114,48 @@ class AmzService:
             print('AMZ SP API list Financial Events status code: '+ str(financialEvents.status_code))
             logging.error('AMZ SP API getFinancialEvents() status code: '+ str(financialEvents.status_code))
             return pd.DataFrame()
+    
+    
+    # This is a multi-use function. It retrieves FinancialEventGroups and also orders that are part of a specific FinancialEventGroupId.
+    # The latter requires a path variable (eventGroupId) and paginates results every 100 orders via NextToken
+    def getFinancialEventGroups(self, start, end, eventGroupId, nextToken):
         
+        request_params = {}
+        if start:
+            request_params['FinancialEventGroupStartedAfter'] = str(start) + 'T00:00:00-05:00'
+        if end:
+            request_params['FinancialEventGroupStartedBefore'] = str(end) + 'T23:59:59-05:00'
+        if nextToken:
+            request_params['NextToken'] = nextToken
+        
+        # Path variable
+        eventGroupIdPath = ''
+        if eventGroupId:
+            eventGroupIdPath = '/' + eventGroupId +'/financialEvents'
+
+        logging.info('Calling AMZ for ' + str(request_params))
+
+        try:
+            financialEventGroups = requests.get(
+                self.endpoint + "/finances/v0/financialEventGroups"
+                + eventGroupIdPath
+                + "?"
+                + urllib.parse.urlencode(request_params),
+                headers={
+                    "x-amz-access-token": self.access_token,
+                },
+            )
+        except:
+            print("Something failed on the Amazon SP API Financial Event Groups service call")
+        
+        if(financialEventGroups is not None and financialEventGroups.status_code == 200):
+            logging.info('AMZ SP API Financial Events Groups status code: ' + str(financialEventGroups.status_code))
+            df = pd.json_normalize(financialEventGroups.json()['payload'])
+            return df
+        else:
+            print('AMZ SP API Financial Events Groups status code: '+ str(financialEventGroups.status_code))
+            logging.error('AMZ SP API getFinancialEventGroups() status code: '+ str(financialEventGroups.status_code))
+            return pd.DataFrame()
 
 
 

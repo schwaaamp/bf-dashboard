@@ -17,7 +17,7 @@ load_figure_template("minty")
 app = Dash(
     __name__, 
     use_pages=True,
-    title="Amazon Dashbaord",
+    title="Amazon Dashboard",
     external_stylesheets=[dbc.themes.MINTY, dbc.icons.FONT_AWESOME], 
     suppress_callback_exceptions=True
 )
