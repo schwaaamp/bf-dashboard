@@ -66,9 +66,21 @@ print('Psuedo profit= ' + str(revenue+expenses))
 # https://developer-docs.amazon.com/sp-api/docs/finances-api-v0-model
 '''
 
+#currently not retrieving anything other than orders
+def getOrdersForDataframe(df, orders_array):
+    for records in df.values:
+        for i in range(len(records)):
+            # check if the array is empty. if not add to order_array
+            g = records[i]
+            if isinstance(g, list):
+                for line_item in g:
+                    order_array.append(line_item)
+    print('total line items: ' + str(len(order_array)))
+    #print(order_array)
+    return order_array
 
 
-def getNextToken(detailedDf, orders):
+def getNextToken(detailedDf, orders, order_array):
     # Check if nexttoken exists and if so make another call to get next 100 orders https://github.com/amzn/selling-partner-api-models/issues/2100
     nextToken =  detailedDf.get('NextToken')
     if nextToken is not None:
@@ -76,11 +88,13 @@ def getNextToken(detailedDf, orders):
     while nextToken:
         print('getting the next token response...')
         detailedDf = service.getFinancialEventGroups(date.today() - timedelta(days=14), None, financialEventGroupId, nextToken)
+        order_array.append(getOrdersForDataframe(detailedDf, order_array))
         orders = pd.concat([orders, detailedDf])
         nextToken = detailedDf.get('NextToken')
         if nextToken is not None:
             nextToken = nextToken.values[0:1][0]
-    return orders
+    #return orders
+    return order_array
 
 
 
@@ -140,18 +154,23 @@ for eventGroup in eventGroups:
         
         # get event group detail by eventgroupid
         orders = pd.DataFrame()
+        order_array = []
         
         detailedDf = service.getFinancialEventGroups(date.today() - timedelta(days=14), None, financialEventGroupId, None)
+        print('financialEventGroupId: ' + financialEventGroupId)
+        order_array = getOrdersForDataframe(detailedDf, order_array)
         orders = pd.concat([orders, detailedDf])
         
         # if it has a nexttoken, retrieve those results as well
-        orders = getNextToken(detailedDf, orders)
+        order_array = getNextToken(detailedDf, orders, order_array)
+        print('financialEventGroupId: ' + financialEventGroupId)
+        print('orders_array length: ' + str(len(order_array)))
         time.sleep(.5)
         
         # Does not appear I'm getting all the order for this fincnailGroupId based on the transaction statment: https://sellercentral.amazon.com/payments/event/view?accountType=PAYABLE&groupId=JmanRVvU6lUaEbAWQ5Cumkur86O2w_TpuPMr5x30vmY&transactionstatus=RELEASED&category=DEFAULT&resultsPerPage=10&pageNumber=1
         # Transaction statement says I have 178 line items including order fees, inbound fees, refunds, reimbursements, advertising
         # Need to export the statement to figure out how to do the math and double check my work
-        if(financialEventGroupId == 'JmanRVvU6lUaEbAWQ5Cumkur86O2w_TpuPMr5x30vmY')
+        if(financialEventGroupId == 'JmanRVvU6lUaEbAWQ5Cumkur86O2w_TpuPMr5x30vmY'):
             for o in orders.values:
             
                 # add up all the reserve, expenses, loan repayments, advertisements, and refunds as expenses from orders

@@ -1,5 +1,6 @@
 from amzService import AmzService
 import pandas as pd
+import time
 
 class PricingService:
     
@@ -21,6 +22,7 @@ class PricingService:
             df = amzService.getPricing(asin_param)
             df.columns = ['ASIN', 'Status', 'Competitive Pricing', 'NumberOfOfferListings', 'MarketplaceId', 'IdentifiersAsin', 'SalesRankings']
             slimDf = df[['ASIN', 'Status', 'Competitive Pricing', 'SalesRankings']].copy()
+            time.sleep(.5)
                 
             #whittle df down to fields we actually want
             recordList = slimDf.values[0:20]
