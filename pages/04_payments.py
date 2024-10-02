@@ -24,13 +24,13 @@ def getOpenPayments():
     financialEventsService = FinancialEventsService()
     df = financialEventsService.getOpenPayments()
     
-    return dbc.Row(
-        [
-            dbc.Col(create_card(df.get('Currency')[0], 'currency-card', 'fa-sack-dollar', df.get('Total Balance')[0]), style={'padding':'3px'}),
-            #dbc.Col(create_card('Units', 'units-card', 'fa-tag', df.get('Unit Count')[0]), style={'padding':'3px'}),
-            #dbc.Col(create_card('Orders', 'orders-card', 'fa-bag-shopping', df.get('Order Count')[0]), style={'padding':'3px'}),
-        ]
-    )
+    dbcRow = []
+    
+    for index, row in df.iterrows():
+        col = dbc.Col(create_card(row.get('Currency'), 'currency-card', 'fa-sack-dollar', row.get('Total Balance')), style={'padding':'3px'})
+        dbcRow.append(col)
+    
+    return dbcRow
 
 # layout
 layout = dbc.Container(
@@ -42,7 +42,7 @@ layout = dbc.Container(
                     className="title",
                 ),
                 html.Br(),
-                getOpenPayments(),
+                dbc.Row(getOpenPayments()),
                 html.Br(),
             ],
             className="page-content",
