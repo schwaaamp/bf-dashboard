@@ -6,81 +6,30 @@ from amzService import AmzService
 # Test getting financial events for yesterday
 # this might be useful for figuring out what i made yesterday
 service = AmzService()
-'''
-start = date.today() - timedelta(days=1)
-end = start
-df = service.getFinancialEvents(start, end)
 
-revenue = 0.0
-expenses = 0.0
-eventList = df['FinancialEvents.ShipmentEventList'].values[0:1]
+# https://advertising.amazon.com/about-api
 
-for orderList in eventList:
-    for order in orderList:
-        shipmentItemList = order['ShipmentItemList']
-        for shipment in shipmentItemList:
-            itemChargeList = shipment['ItemChargeList']
-            for itemCharge in itemChargeList:
-                amt = itemCharge['ChargeAmount']['CurrencyAmount']
-                revenue += amt
-                print(amt)
-
-            itemFeesList = shipment['ItemFeeList']
-            for itemFee in itemFeesList:
-                fee = itemFee['FeeAmount']['CurrencyAmount']
-                expenses += fee
-                print(fee)
-
-            try:
-                promotionList = shipment['PromotionList']
-                for promotion in promotionList:
-                    promotion = promotion['PromotionAmount']['CurrencyAmount']
-                    expenses += promotion
-                    print(promotion)
-            except:
-                print('This order is missing the promotion list')
-
-
-            # I don't think I need to add this tax because we never added it from the itemCharge section
-            try:
-                itemTaxes = shipment['ItemTaxWithheldList']
-                for itemTax in itemTaxes:
-                    tax = itemTaxes['TaxesWithheld']['CurrencyAmount']
-                    #expenses += tax
-                    print(tax)
-            except:
-                print('This order is missing the ItemTaxWithheldList')
-
-
-                # https://advertising.amazon.com/about-api
-
-
-print('Yesterday\'s revenue= ' + str(revenue))
-print('Yesterday\'s expenses= ' + str(expenses))
-print('Psuedo profit= ' + str(revenue+expenses))
 # Goal is to use this to find out revenue and expenses from yesterday's transactions
 # In order to fully calculate profit for yesterday, need to include expenses for inbound, storage, ppc, RATER, unit costs, etc.
 # ProductAdsPaymentEvent
 # Promotion
 # RefundEventList
 # https://developer-docs.amazon.com/sp-api/docs/finances-api-v0-model
-'''
 
-#currently not retrieving anything other than orders
-def getOrdersForDataframe(df, orders_array):
+
+#def getOrdersForDataframe(df, orders_array):
+def getOrdersForDataframe(df, order_array):
     for records in df.values:
         for i in range(len(records)):
-            # check if the array is empty. if not add to order_array
             g = records[i]
             if isinstance(g, list):
                 for line_item in g:
                     order_array.append(line_item)
     print('total line items: ' + str(len(order_array)))
-    #print(order_array)
     return order_array
 
 
-def getNextToken(detailedDf, orders, order_array):
+def getNextToken(detailedDf, order_array):
     # Check if nexttoken exists and if so make another call to get next 100 orders https://github.com/amzn/selling-partner-api-models/issues/2100
     nextToken =  detailedDf.get('NextToken')
     if nextToken is not None:
@@ -89,7 +38,6 @@ def getNextToken(detailedDf, orders, order_array):
         print('getting the next token response...')
         detailedDf = service.getFinancialEventGroups(date.today() - timedelta(days=14), None, financialEventGroupId, nextToken)
         order_array.append(getOrdersForDataframe(detailedDf, order_array))
-        orders = pd.concat([orders, detailedDf])
         nextToken = detailedDf.get('NextToken')
         if nextToken is not None:
             nextToken = nextToken.values[0:1][0]
@@ -103,47 +51,16 @@ def getNextToken(detailedDf, orders, order_array):
 
 print("Trying to get open payments...")
 print('Getting payments from: ' + str(date.today() - timedelta(days=14)))
-'''
-df = service.getFinancialEventGroups(date.today() - timedelta(days=14), None, None, None)
-
-financialEventGroupIds = []
-eventGroups = df.values[0:1][0][0:1][0]
-for eventGroup in eventGroups:
-    status = eventGroup['ProcessingStatus']
-    if(status == 'Open'):
-        financialEventGroupIds.append(eventGroup['FinancialEventGroupId'])
-        originalCurrency = eventGroup['OriginalTotal']['CurrencyCode']
-        if(originalCurrency == 'USD'):
-            print('FinancialEventGroupId ' + eventGroup['FinancialEventGroupId'] + ' is the primary id (USD)')
-
-# Call getFinancialEventsForGroupId to get order detail for each FinancialEventGroupId 
-
-#results = pd.DataFrame(columns=['FinancialEventGroupId', 'CurrencyCode', 'TotalAmount'])
-results = pd.DataFrame()
-for financialEventGroupId in financialEventGroupIds:
-    orders = pd.DataFrame()
-    detailedDf = service.getFinancialEventGroups(date.today() - timedelta(days=14), None, financialEventGroupId, None)
-    eventList = detailedDf['FinancialEvents.ShipmentEventList'].values[0:1]
-    something = detailedDf.values[0:1][0]
-    print('eventList: ' + str(eventList))
-    print('something: ' + str(something))
-    orders = pd.concat([orders, detailedDf])
-    # try to see if it has a nexttoken
-    
-    orders = getNextToken(detailedDf, orders)
-    #print(detailedDf)
-    results = pd.concat([results, orders])
-    time.sleep(.5)
-
-print(results)        
-'''
 
 df = service.getFinancialEventGroups(date.today() - timedelta(days=14), None, None, None)
 financialEventGroupIds = []
 eventGroups = df.values[0:1][0][0:1][0]
+
+result = pd.DataFrame()
 
 # for eventgroupid
 for eventGroup in eventGroups:
+    eventGroupStart = eventGroup['FinancialEventGroupStart']
     status = eventGroup['ProcessingStatus']
     if(status == 'Open'):
         financialEventGroupId = eventGroup['FinancialEventGroupId']
@@ -153,97 +70,170 @@ for eventGroup in eventGroups:
         totalBalance = eventGroup['OriginalTotal']['CurrencyAmount']
         
         # get event group detail by eventgroupid
-        orders = pd.DataFrame()
         order_array = []
         
         detailedDf = service.getFinancialEventGroups(date.today() - timedelta(days=14), None, financialEventGroupId, None)
-        print('financialEventGroupId: ' + financialEventGroupId)
         order_array = getOrdersForDataframe(detailedDf, order_array)
-        orders = pd.concat([orders, detailedDf])
         
         # if it has a nexttoken, retrieve those results as well
-        order_array = getNextToken(detailedDf, orders, order_array)
-        print('financialEventGroupId: ' + financialEventGroupId)
-        print('orders_array length: ' + str(len(order_array)))
+        order_array = getNextToken(detailedDf, order_array)
+        #print('financialEventGroupId: ' + financialEventGroupId)
+        #print('order_array length: ' + str(len(order_array)))
         time.sleep(.5)
+        
+        #print(order_array)
         
         # Does not appear I'm getting all the order for this fincnailGroupId based on the transaction statment: https://sellercentral.amazon.com/payments/event/view?accountType=PAYABLE&groupId=JmanRVvU6lUaEbAWQ5Cumkur86O2w_TpuPMr5x30vmY&transactionstatus=RELEASED&category=DEFAULT&resultsPerPage=10&pageNumber=1
         # Transaction statement says I have 178 line items including order fees, inbound fees, refunds, reimbursements, advertising
-        # Need to export the statement to figure out how to do the math and double check my work
-        if(financialEventGroupId == 'JmanRVvU6lUaEbAWQ5Cumkur86O2w_TpuPMr5x30vmY'):
-            for o in orders.values:
-            
-                # add up all the reserve, expenses, loan repayments, advertisements, and refunds as expenses from orders
-                expenses = 0.0
-                #eventList = o['FinancialEvents.ShipmentEventList']
-                #print(eventList)
-                
-                #for orderList in eventList:
-                for orderList in o:
-                    orderCount = 0
-                    for order in orderList:
-                        orderCount += 1
-                        orderExpenses = 0.0
-                        shipmentItemList = order['ShipmentItemList']
-                        for shipment in shipmentItemList:
-                            itemChargeList = shipment['ItemChargeList']
-                            for itemCharge in itemChargeList:
-                                amt = itemCharge['ChargeAmount']['CurrencyAmount']
-                                #revenue += amt
-
-                            itemFeesList = shipment['ItemFeeList']
-                            for itemFee in itemFeesList:
-                                fee = itemFee['FeeAmount']['CurrencyAmount']
-                                expenses += fee
-                                orderExpenses += fee
-
-                            try:
-                                promotionList = shipment['PromotionList']
-                                for promotion in promotionList:
-                                    promotion = promotion['PromotionAmount']['CurrencyAmount']
-                                    expenses += promotion
-                                    orderExpenses += promotion
-                            except:
-                                print('This order is missing the promotion list')
-
-
-                            # I don't think I need to add this tax because we never added it from the itemCharge section
-                            try:
-                                itemTaxes = shipment['ItemTaxWithheldList']
-                                for itemTax in itemTaxes:
-                                    tax = itemTaxes['TaxesWithheld']['CurrencyAmount']
-                                    #expenses += tax
-                            except:
-                                print('This order is missing the ItemTaxWithheldList')
-                        
-                        print('order expenses: ' + str(orderExpenses))
-                    print('total orders: ' + str(orderCount))
-                
-                try:
-                    ppcExpenses = orders['ProductAdsPaymentEventList']
-                    transactionValue = ppcExpenses['TransactionValue']['CurrencyAmount']
-                    expenses += transactionValue
-                except:
-                    print('No PPC expenses in this Financial Event Group')
-                    
-                try:
-                    inboundFeesList = orders['ServiceFeeEventList']
-                    for inboundFee in inboundFeesList:
-                        fee = inboundFee['FeeList']['FeeAmount']['CurrencyAmount']
-                        expenses += fee
-                except:
-                    print('No Inbound Fees in this Financial Event Group')
-                
-                
-                #AdjustmentItemList
-                    
-                print('==========')
-                print('financialEventGroupId: ' + financialEventGroupId)
-                print('original currency: ' + originalCurrency)
-                print('total balance: ' + str(totalBalance))
-                print('expenses: ' + str(expenses))
-                print('net: ' + str(totalBalance - expenses))
         
+        # add up all the reserve, expenses, loan repayments, advertisements, and refunds as expenses from orders
+        expenses = 0.0
+        orderExpenses = 0.0
+        adjustments = 0.0
+        allTheFees = dict(ORDER_FEES=0.0, TRANSPORTATION_FEES=0.0, PPC_FEES=0.0, ADJUSTMENTS=0.0, DEBT_RECOVERY=0.0)
+        for order in order_array:
+            
+            try:
+                shipmentItemList = order['ShipmentItemList']
+                for shipment in shipmentItemList:
+                    itemChargeList = shipment['ItemChargeList']
+                    for itemCharge in itemChargeList:
+                        amt = itemCharge['ChargeAmount']['CurrencyAmount']
+                        #revenue += amt
+
+                    itemFeesList = shipment['ItemFeeList']
+                    for itemFee in itemFeesList:
+                        fee = itemFee['FeeAmount']['CurrencyAmount']
+                        expenses += fee
+                        orderExpenses += fee
+                        allTheFees['ORDER_FEES'] += fee
+
+                    try:
+                        promotionList = shipment['PromotionList']
+                        for promotion in promotionList:
+                            promotion = promotion['PromotionAmount']['CurrencyAmount']
+                            expenses += promotion
+                            orderExpenses += promotion
+                            #print('promotion: ' + str(promotion))
+                    except:
+                        pass
+
+
+                    # I don't think I need to add this tax because we never added it from the itemCharge section
+                    '''
+                    try:
+                        itemTaxes = shipment['ItemTaxWithheldList']
+                        for itemTax in itemTaxes:
+                            tax = itemTaxes['TaxesWithheld']['CurrencyAmount']
+                            #expenses += tax
+                    except:
+                        pass
+                    '''
+            except:
+                pass
+                                      
+            #print('order expenses: ' + str(orderExpenses))
+            
+            try:
+                adjustmentType = order['AdjustmentType']
+                adjustmentAmount = order['AdjustmentAmount']['CurrencyAmount']
+                adjustments += adjustmentAmount
+                #print('adjustment: ' + adjustmentType + ' ' + str(adjustmentAmount))
+                allTheFees['ADJUSTMENTS'] += adjustments
+            except:
+                pass
+            
+            
+            # PPC 
+            # Should I try to get this from the advertising API instead?
+            '''
+            [{
+                'postedDate': '2024-09-19T19:48:59Z',
+                'transactionType': 'Charge',
+                'invoiceId': 'TRBYTQG3Q-87',
+                'baseValue': {
+                    'CurrencyCode': 'USD',
+                    'CurrencyAmount': -501.79
+                },
+                'taxValue': {
+                    'CurrencyCode': 'USD',
+                    'CurrencyAmount': 0.0
+                },
+                'transactionValue': {
+                    'CurrencyCode': 'USD',
+                    'CurrencyAmount': -501.79
+                }
+            }]
+            '''
+            
+            try:
+                # Can I get this from the advertising API?
+                ppcExpenses = order['ProductAdsPaymentEventList']
+                transactionValue = ppcExpenses['TransactionValue']['CurrencyAmount']
+                #print('PPC fee: ' + str(transactionValue))
+                expenses += transactionValue
+                allTheFees['PPC_FEES'] += transactionValue
+            except:
+                pass
+            
+            try:
+                randomFees = order['FeeList']
+                inboundConvenienceFee = 0.0
+                for f in randomFees:
+                    inboundConvenienceFee = f['FeeAmount']['CurrencyAmount']
+                    expenses += inboundConvenienceFee
+                #print('inboundConvenienceFee: ' + str(inboundConvenienceFee))
+                allTheFees['TRANSPORTATION_FEES'] += inboundConvenienceFee
+            except:
+                pass
+                
+            try:
+                inboundFeesList = order['ServiceFeeEventList']
+                inboundFee = 0.0
+                for inboundFee in inboundFeesList:
+                    inboundFee = inboundFee['FeeList']['FeeAmount']['CurrencyAmount']
+                    expenses += inboundFee
+                #print('Inbound fee: ' + str(inboundFee))
+                allTheFees['TRANSPORTATION_FEES'] += inboundFee
+            except:
+                pass
+            
+            try:
+                # Believe this is when I owe for selling in this marketplace but haven't made any money, so I owe the selling fee
+                debtRecoveryType = order['DebtRecoveryType']
+                debtFee = 0.0
+                for itemList in order['DebtRecoveryItemList']:
+                    debtFee += itemList['OriginalAmount']['CurrencyAmount']
+                expenses += debtFee
+                allTheFees['DEBT_RECOVERY'] += debtFee
+            except:
+                pass
+            
+        
+        tempDf = pd.DataFrame({'FinancialEventGroupId':[financialEventGroupId], 'eventGroupStart':[eventGroupStart], 'Status':[status], 'Currency':[originalCurrency], 'Total Balance':[totalBalance], 'Fees':[allTheFees]})
+        #print(tempDf)
+        result = pd.concat([result, tempDf])
+        '''
+        print('==========')
+        print('financialEventGroupId: ' + financialEventGroupId)
+        print('original currency: ' + originalCurrency)
+        print('total balance: ' + str(totalBalance))
+        print('expenses: ' + str(expenses))
+        print('adjustments: ' + str(adjustments))
+        print('net: ' + str(totalBalance + expenses))
+        '''
+print(result)
+
+# Still need to look at promotions, they deduct for free shipping and there is a big chunk for previous reserve
+
+
+#order fees: -2384.83
+#other: +2877.53 (previous reserve + reimbursements)
+#refunds: -57.18 ( original sale price (neg) + amazonFees(pos))
+#transportation: -166.12
+#ppc: -350.32 - 501.79 = -852.11 ?????
+# total (minus other) = 3460.24
+
 
     
     
