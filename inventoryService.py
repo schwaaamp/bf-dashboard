@@ -1,6 +1,7 @@
 
 from datetime import date, timedelta
 import pandas as pd
+import numpy as np
 import time
 from amzService import AmzService
 from salesService import SalesService
@@ -36,4 +37,5 @@ class InventoryService:
                             avgDf = pd.DataFrame({'ASIN': [asin], 'Available':[available], 'Total Inbound':[inbound], 'Total On Hand':[available + inbound + fcTransfer], 'Week Average':[week_avg.values[0]], 'Weeks On Hand':[weeks_on_hand]})
                             df = pd.concat([df, avgDf])
 
+        df.replace([np.inf, -np.inf], 100, inplace=True)
         return(df.sort_values(by=['Weeks On Hand']))
