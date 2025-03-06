@@ -27,6 +27,7 @@ amzService = AmzService()
 
 # ===================== TODAY'S SALES ==============================
 def getSalesForToday():
+    print('Getting sales for today...')
     amzService = AmzService()
     df = amzService.getSales('', date.today(), date.today(), 'Day')
     df.columns = ['Day', 'Unit Count', 'Order Item Count', 'Order Count', 'Avg Unit Price', 'Currency', 'Total Sales', 'Currency2']

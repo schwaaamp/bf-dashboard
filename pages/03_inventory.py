@@ -40,8 +40,10 @@ def getInventory():
         rowData=df.to_dict("records"),
         columnDefs=columnDefs,
         columnSize="sizeToFit",
-        style={"height": "344px", "width": "400px"}
+        dashGridOptions={"domLayout": "autoHeight"},
+        style={"width": "400px"}
     )
+    
     return dbc.Col(grid, className='col-sm')
 
 

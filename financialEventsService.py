@@ -216,5 +216,4 @@ class FinancialEventsService:
                 tempDf = pd.DataFrame({'FinancialEventGroupId':[financialEventGroupId], 'eventGroupStart':[eventGroupStart], 'Status':[status], 'Currency':[originalCurrency], 'Total Balance':[totalBalance], 'Fees':[allTheFees]})
                 result = pd.concat([result, tempDf], ignore_index=True)
         
-        print(result)
         return result
