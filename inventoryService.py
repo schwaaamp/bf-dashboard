@@ -37,5 +37,6 @@ class InventoryService:
                             avgDf = pd.DataFrame({'ASIN': [asin], 'Available':[available], 'Total Inbound':[inbound], 'Total On Hand':[available + inbound + fcTransfer], 'Week Average':[week_avg.values[0]], 'Weeks On Hand':[weeks_on_hand]})
                             df = pd.concat([df, avgDf])
 
+        # replace infinity values with 100
         df.replace([np.inf, -np.inf], 100, inplace=True)
         return(df.sort_values(by=['Weeks On Hand']))
