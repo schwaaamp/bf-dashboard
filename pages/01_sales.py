@@ -55,8 +55,9 @@ def show_averages():
     for asin in asinSkuMapper.keys():
         df_last = salesService.getSalesByDay(asin, last_start, last_start + timedelta(days=6))
         df_eight = salesService.getSalesByDay(asin, eight_start, eight_start + timedelta(days=56))
+        sales_avg = df_eight['Sales'].sum() and df_eight['Sales'].sum() / 8 or 0
 
-        df = pd.DataFrame({"ASIN": [asin], "Product": [asinNames.get(asin)], "Sales Last Week": [df_last['Sales'].sum()], "Sales Avg": [df_eight['Sales'].sum() / 8]})
+        df = pd.DataFrame({"ASIN": [asin], "Product": [asinNames.get(asin)], "Sales Last Week": [df_last['Sales'].sum()], "Sales Avg": sales_avg})
 
         sales_lw = float(format(df.get('Sales Last Week')[0], '.2f'))
         sales_avg = float(format(df.get('Sales Avg')[0], '.2f'))

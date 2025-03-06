@@ -1,5 +1,6 @@
 import csv
 import datetime
+import time
 from datetime import date, timedelta
 from pathlib import Path
 import pandas as pd
@@ -93,6 +94,8 @@ class SalesService:
 
 
     def getSalesFromAmz(self, asin, start, end, gran):
+        # Adding delay to try to prevent 529s
+        time.sleep(.5)
         try:
             service = AmzService()
             df = service.getSales(asin, start, end, gran)
