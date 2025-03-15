@@ -98,7 +98,7 @@ class SalesService:
         # Adding delay to try to prevent 529s
         time.sleep(.5)
         #try:
-        print('Getting sales from Amazon...')
+        print('Getting sales from Amazon for ' + start + ' - ' + end + ' for asin: ' + asin + ' and granularity: ' + gran + '...')
         service = AmzService()
         df = service.getSales(asin, start, end, gran)
         #except: 
