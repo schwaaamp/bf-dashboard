@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 from utils.functions import create_card
 import pandas as pd
 import plotly.express as px
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from asinSkuUtil import asinSkuMapper
 from asinNameUtil import asinNames
 from amzService import AmzService
@@ -27,7 +27,7 @@ amzService = AmzService()
 
 # ===================== TODAY'S SALES ==============================
 def getSalesForToday():
-    print('Getting sales for today...')
+    print('Getting sales for today ... ' + str(pd.Timestamp.now()))
     amzService = AmzService()
     df = amzService.getSales('', date.today(), date.today(), 'Day')
     df.columns = ['Day', 'Unit Count', 'Order Item Count', 'Order Count', 'Avg Unit Price', 'Currency', 'Total Sales', 'Currency2']
@@ -84,9 +84,19 @@ def show_averages():
 # ===================== SALES BY ASIN BY DATE RANGE ==============================
 def getSalesForDatePicker(start, end, asin, granularity):
     df = salesService.getSalesForDatesByAsin(start, end, asin, granularity)
+    
+    offset = pd.DateOffset(years=-1)
+    prev_start = datetime.strftime(pd.Timestamp(start) + offset, '%Y-%m-%d')
+    prev_end = datetime.strftime(pd.Timestamp(end) + offset, '%Y-%m-%d')
+    
+    amzService = AmzService()
+    prev_df = amzService.getSales('', prev_start, prev_end, granularity)
+    prev_df['Week'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%W'), axis=1)
+    prev_df['Month'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%b'), axis=1)
+    prev_df['Year'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%Y'), axis=1)    
             
     if granularity == 'Week':
-        df = df.groupby(['Week', 'ASIN', 'Product'], sort=False, observed=True)['Sales'].sum().reset_index()
+        df = df.groupby(['Week', 'ASIN', 'Product', 'Year'], sort=False, observed=True)['Sales'].sum().reset_index()
     elif granularity == 'Month':
         df = df.groupby(['Month', 'ASIN', 'Product'], sort=False, observed=True)['Sales'].sum().reset_index()
         df['Month'] = pd.Categorical(df['Month'], categories=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], ordered=True)
@@ -94,13 +104,20 @@ def getSalesForDatePicker(start, end, asin, granularity):
     else:
         # Change from Day to Date for bar chart
         granularity = 'Date'
+
     
     bar_chart = px.bar(df, x=granularity, y="Sales", color="Product", barmode="stack", template="minty")
     bar_chart.layout.xaxis.fixedrange = True
     bar_chart.layout.yaxis.fixedrange = True
     bar_chart.update_layout(showlegend = False)
+    
+    line_chart = px.line(prev_df, x=granularity, y="totalSales.amount").update_traces(patch={"line": {"color": "#a569bd", "dash": 'dot'}})
+    bar_chart.add_traces(line_chart.data)
+    
+    
     pie_chart = px.pie(df, values='Sales', names='Product', template="minty")
     pie_chart.update_layout(showlegend = False)
+    
 
     return html.Div([
             html.Div(dcc.Graph(figure = bar_chart), className='col-lg-8'),
@@ -113,36 +130,37 @@ asinDD = asinSkuMapper.copy()
 asinDD["All"] = ["All", "All"]
 
 # layout
-layout = dbc.Container(
-    [
-        html.Div(
-            [
-                html.H2(
-                    "Sales",  # title
-                    className="title",
-                ),
-                html.Br(),
-                getSalesForToday(),
-                html.Br(),
-                dbc.Row(show_averages()),
-                html.Br(),
-                dbc.Row([
-                    dbc.Col([
-                        dcc.DatePickerRange(
-                            id='my-date-picker-range',
-                            initial_visible_month=date.today(),
-                            start_date=date.today() - timedelta(days=30),
-                            end_date=date.today()
-                        )], width="auto"),
-                    dbc.Col([dcc.Dropdown(list(asinDD.keys()), 'All', id='asin-dd', clearable=False, style={'width':'130px'})], width="auto"),
-                    dbc.Col([dcc.Dropdown(['Day', 'Week', 'Month'], 'Week', id='granularity-dd', clearable=False, style={'width':'100px'})], width="auto")], className='my-1'),
-                dbc.Row([dbc.Col(html.Div(id='sales-report-body'))]),
-            ],
-            className="page-content",
-        )
-    ],
-    fluid=True,
-)
+def layout():
+    return dbc.Container(
+        [
+            html.Div(
+                [
+                    html.H2(
+                        "Sales",  # title
+                        className="title",
+                    ),
+                    html.Br(),
+                    getSalesForToday(),
+                    html.Br(),
+                    dbc.Row(show_averages()),
+                    html.Br(),
+                    dbc.Row([
+                        dbc.Col([
+                            dcc.DatePickerRange(
+                                id='my-date-picker-range',
+                                initial_visible_month=date.today(),
+                                start_date=date.today() - timedelta(days=30),
+                                end_date=date.today()
+                            )], width="auto"),
+                        dbc.Col([dcc.Dropdown(list(asinDD.keys()), 'All', id='asin-dd', clearable=False, style={'width':'130px'})], width="auto"),
+                        dbc.Col([dcc.Dropdown(['Day', 'Week', 'Month'], 'Week', id='granularity-dd', clearable=False, style={'width':'100px'})], width="auto")], className='my-1'),
+                    dbc.Row([dbc.Col(html.Div(id='sales-report-body'))]),
+                ],
+                className="page-content",
+            )
+        ],
+        fluid=True,
+    )
 
 
 @callback(
@@ -152,6 +170,8 @@ layout = dbc.Container(
     Input('asin-dd', 'value'),
     Input('granularity-dd', 'value'))
 def update_output(start_date, end_date, asin, granularity):
+    print('updating sales...')
+    #getSalesForToday()
     if start_date is not None and end_date is not None:
         return getSalesForDatePicker(start_date, end_date, asin, granularity)
     else:

@@ -76,7 +76,7 @@ class AmzService:
             df = pd.json_normalize(sales.json()['payload'])
             return df
         else:
-            logging.error('AMZ SP API getSales() status code: '+ str(sales.status_code) + ' access token: ' + self.access_token + ' params: ' + str(request_params))
+            logging.error('AMZ SP API getSales() status code: '+ str(sales.status_code) + ' params: ' + str(request_params))
             raise ValueError(sales.status_code)
     
 

@@ -86,6 +86,7 @@ class SalesService:
         sales = self.getSalesByDay(asin, start, end)
         sales['Week'] = sales.apply(lambda row: date.fromisoformat(row.Date).strftime('%W'), axis=1)
         sales['Month'] = sales.apply(lambda row: date.fromisoformat(row.Date).strftime('%b'), axis=1)
+        sales['Year'] = sales.apply(lambda row: date.fromisoformat(row.Date).strftime('%Y'), axis=1)
         return sales
 
 
@@ -96,10 +97,11 @@ class SalesService:
     def getSalesFromAmz(self, asin, start, end, gran):
         # Adding delay to try to prevent 529s
         time.sleep(.5)
-        try:
-            service = AmzService()
-            df = service.getSales(asin, start, end, gran)
-        except: 
-            service.refreshAccessToken()
-            df = service.getSales(asin, start, end, gran)
+        #try:
+        print('Getting sales from Amazon...')
+        service = AmzService()
+        df = service.getSales(asin, start, end, gran)
+        #except: 
+        #    service.refreshAccessToken()
+        #    df = service.getSales(asin, start, end, gran)
         return df
