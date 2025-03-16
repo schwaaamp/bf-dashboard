@@ -23,7 +23,6 @@
         # Perhaps this can be a card at the top
     # Sales
         # Get sales from the month prior and overlay bar graph
-        # Get sales from 1 year prior and overlay bar graph
         # Aggregate 5 and 10 packs of same brand
     # Inventory
         # Products

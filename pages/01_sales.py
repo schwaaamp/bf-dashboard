@@ -109,9 +109,11 @@ def getSalesForDatePicker(start, end, asin, granularity):
     bar_chart = px.bar(df, x=granularity, y="Sales", color="Product", barmode="stack", template="minty")
     bar_chart.layout.xaxis.fixedrange = True
     bar_chart.layout.yaxis.fixedrange = True
-    bar_chart.update_layout(showlegend = False)
+    bar_chart.update_layout(xaxis=dict(tickformat="%W"))
+    #bar_chart.update_layout(showlegend = False)
     
     line_chart = px.line(prev_df, x=granularity, y="totalSales.amount").update_traces(patch={"line": {"color": "#a569bd", "dash": 'dot'}})
+    line_chart.update_traces(name='Previous Year', showlegend=True)
     bar_chart.add_traces(line_chart.data)
     
     
