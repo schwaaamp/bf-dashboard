@@ -84,9 +84,14 @@ class SalesService:
 
     def getSalesByWeek(self, asin, start, end):
         sales = self.getSalesByDay(asin, start, end)
-        sales['Week'] = sales.apply(lambda row: date.fromisoformat(row.Date).strftime('%W'), axis=1)
+        print('======================= START =====================')
+        print(sales)
+        sales['Week'] = sales.apply(lambda row: date.fromisoformat(row.Date).strftime('%V'), axis=1)
         sales['Month'] = sales.apply(lambda row: date.fromisoformat(row.Date).strftime('%b'), axis=1)
         sales['Year'] = sales.apply(lambda row: date.fromisoformat(row.Date).strftime('%Y'), axis=1)
+        
+        print('======================= MODIFIED =====================')
+        print(sales)
         return sales
 
 

@@ -91,7 +91,7 @@ def getSalesForDatePicker(start, end, asin, granularity):
     
     amzService = AmzService()
     prev_df = amzService.getSales('', prev_start, prev_end, granularity)
-    prev_df['Week'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%W'), axis=1)
+    prev_df['Week'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%V'), axis=1)
     prev_df['Month'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%b'), axis=1)
     prev_df['Year'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%Y'), axis=1)    
             
@@ -109,7 +109,6 @@ def getSalesForDatePicker(start, end, asin, granularity):
     bar_chart = px.bar(df, x=granularity, y="Sales", color="Product", barmode="stack", template="minty")
     bar_chart.layout.xaxis.fixedrange = True
     bar_chart.layout.yaxis.fixedrange = True
-    bar_chart.update_layout(xaxis=dict(tickformat="%W"))
     #bar_chart.update_layout(showlegend = False)
     
     line_chart = px.line(prev_df, x=granularity, y="totalSales.amount").update_traces(patch={"line": {"color": "#a569bd", "dash": 'dot'}})
