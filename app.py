@@ -19,8 +19,13 @@ load_dotenv()  # loads variables from .env into environment
 
 # ===================== Initialize the app ==============================
 load_figure_template("minty")
-valid_pairs_str = os.getenv('VALID_USERNAME_PASSWORD_PAIR')
-valid_pairs = json.loads(valid_pairs_str)  # parse string into dict
+username = os.getenv('VALID_PAIR_USERNAME')
+password = os.getenv('VALID_PAIR_PWORD')
+
+# Create a dict for dash-auth
+valid_pairs = {
+    username: password
+}
 
 app = Dash(
     __name__, 
