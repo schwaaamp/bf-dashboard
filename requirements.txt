@@ -11,4 +11,5 @@ pandas
 plotly
 Flask
 gunicorn
+schedule
 multipledispatch==1.0.0
