@@ -1,10 +1,10 @@
 # Import packages
+from dotenv import load_dotenv
+import os
 import logging
 import pandas as pd
 import requests
 import urllib.parse
-from dotenv import load_dotenv
-import os
 
 class AmzService:
     

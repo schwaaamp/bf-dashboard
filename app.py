@@ -1,11 +1,11 @@
+from dotenv import load_dotenv
+import os
 import dash
 from dash import Dash, html, dcc, Input, Output, callback, dash_table
 import dash_ag_grid as dag
 import dash_auth
 import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
-from dotenv import load_dotenv
-import os
 import json
 from flask import Flask, session
 
