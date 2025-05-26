@@ -3,9 +3,12 @@ import logging
 import pandas as pd
 import requests
 import urllib.parse
-from credentials import credentials
+from dotenv import load_dotenv
+import os
 
 class AmzService:
+    
+    load_dotenv()  # loads variables from .env into environment
 
     # Get Sales data from AMZ
     token_response = ''
@@ -19,9 +22,9 @@ class AmzService:
             "https://api.amazon.com/auth/o2/token",
             data={
                 "grant_type": "refresh_token",
-                "refresh_token": credentials["refresh_token"],
-                "client_id": credentials["lwa_app_id"],
-                "client_secret": credentials["lwa_client_secret"],
+                "refresh_token": os.getenv("refresh_token"),
+                "client_id": os.getenv("lwa_app_id"),
+                "client_secret": os.getenv("lwa_client_secret"),
             },
         )
         

@@ -4,16 +4,22 @@ import dash_ag_grid as dag
 import dash_auth
 import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
-from credentials import credentials
+from dotenv import load_dotenv
+import os
+import json
 from flask import Flask, session
 
 
 
+load_dotenv()  # loads variables from .env into environment
 
 
 
 # ===================== Initialize the app ==============================
 load_figure_template("minty")
+valid_pairs_str = os.getenv('VALID_USERNAME_PASSWORD_PAIR')
+valid_pairs = json.loads(valid_pairs_str)  # parse string into dict
+
 app = Dash(
     __name__, 
     use_pages=True,
@@ -24,8 +30,8 @@ app = Dash(
 server = app.server
 auth = dash_auth.BasicAuth(
     app,
-    credentials['VALID_USERNAME_PASSWORD_PAIR'],
-    secret_key = credentials['DASH_SECRET_KEY']
+    valid_pairs,
+    secret_key = os.getenv('DASH_SECRET_KEY')
 )
 
 # sidebar

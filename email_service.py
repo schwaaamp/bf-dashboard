@@ -5,13 +5,18 @@ import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
-from credentials import credentials
 from inventoryService import InventoryService
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()  # loads variables from .env into environment
+
 
 def send_weekly_email():
-    sender_email = credentials["EMAIL_ADDRESS"]
-    sender_password = credentials["EMAIL_PASSWORD"]
-    recipient_email = credentials["RECIPIENT_EMAIL"]
+    sender_email = os.getenv("EMAIL_ADDRESS")
+    sender_password = os.getenv("EMAIL_PASSWORD")
+    recipient_email = os.getenv("RECIPIENT_EMAIL")
     
     message = MIMEMultipart("alternative")
     message["From"] = sender_email

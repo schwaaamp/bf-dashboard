@@ -8,7 +8,12 @@ import plotly.express as px
 from datetime import date, timedelta
 from inventoryService import InventoryService
 import anthropic
-from credentials import credentials
+from dotenv import load_dotenv
+import os
+
+
+
+load_dotenv()  # loads variables from .env into environment
 
 
 
@@ -51,7 +56,7 @@ def getInventory():
     
     # start anthropic
     client = anthropic.Anthropic(
-        api_key=credentials['bf_dashboard_anthropic_key']
+        api_key=os.getenv('bf_dashboard_anthropic_key')
     )
     #message = client.messages.create(
     #    model="claude-3-5-haiku-20241022",
