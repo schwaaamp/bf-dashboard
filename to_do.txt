@@ -22,6 +22,7 @@
         # Can I list ratings too?
         # Perhaps this can be a card at the top
     # Sales
+        # Update the previous year sales to match asin filter
         # Get sales from the month prior and overlay bar graph
         # Aggregate 5 and 10 packs of same brand
     # Inventory

@@ -7,6 +7,10 @@ import pandas as pd
 import plotly.express as px
 from datetime import date, timedelta
 from inventoryService import InventoryService
+import anthropic
+from credentials import credentials
+
+
 
 dash.register_page(
     __name__,
@@ -22,7 +26,7 @@ warnings.filterwarnings("ignore")
 # ===================== Get Inventory ==============================
 def getInventory():
     inventoryService = InventoryService()
-    df = inventoryService.getInventoryNeeds()    
+    inventoryDf = inventoryService.getInventoryNeeds()
     columnDefs = [
         { 'field': 'ASIN'},
         { 'field': 'Available', "type": "numericColumn"},
@@ -37,12 +41,27 @@ def getInventory():
 
     grid = dag.AgGrid(
         id="inventoryNeeds",
-        rowData=df.to_dict("records"),
+        rowData=inventoryDf.to_dict("records"),
         columnDefs=columnDefs,
         columnSize="sizeToFit",
         dashGridOptions={"domLayout": "autoHeight"},
         style={"width": "400px"}
     )
+    
+    
+    # start anthropic
+    client = anthropic.Anthropic(
+        api_key=credentials['bf_dashboard_anthropic_key']
+    )
+    #message = client.messages.create(
+    #    model="claude-3-5-haiku-20241022",
+    #    max_tokens=1024,
+    #    messages=[
+    #        {"role": "user", "content": "Hello, Claude"}
+    #    ]
+    #)
+    #print(message.content)
+    # end anthropic
     
     return dbc.Col(grid, className='col-sm')
 

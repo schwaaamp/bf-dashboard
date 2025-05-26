@@ -23,6 +23,7 @@ warnings.filterwarnings("ignore")
 
 salesService = SalesService()
 amzService = AmzService()
+salesDf = pd.DataFrame()
 
 
 # ===================== TODAY'S SALES ==============================
@@ -90,10 +91,12 @@ def getSalesForDatePicker(start, end, asin, granularity):
     prev_end = datetime.strftime(pd.Timestamp(end) + offset, '%Y-%m-%d')
     
     amzService = AmzService()
+    # Consider getting previous year sales by ASIN so the filter works on the graph
     prev_df = amzService.getSales('', prev_start, prev_end, granularity)
     prev_df['Week'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%V'), axis=1)
     prev_df['Month'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%b'), axis=1)
-    prev_df['Year'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%Y'), axis=1)    
+    prev_df['Year'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%Y'), axis=1)
+    print(prev_df)
             
     if granularity == 'Week':
         df = df.groupby(['Week', 'ASIN', 'Product', 'Year'], sort=False, observed=True)['Sales'].sum().reset_index()
@@ -105,6 +108,9 @@ def getSalesForDatePicker(start, end, asin, granularity):
         # Change from Day to Date for bar chart
         granularity = 'Date'
 
+    
+    #print(df)
+    salesDf = df
     
     bar_chart = px.bar(df, x=granularity, y="Sales", color="Product", barmode="stack", template="minty")
     bar_chart.layout.xaxis.fixedrange = True
