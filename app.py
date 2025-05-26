@@ -11,6 +11,8 @@ from flask import Flask, session
 
 
 
+# Load .env using full path
+dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv()  # loads variables from .env into environment
 
 
