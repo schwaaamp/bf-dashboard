@@ -1,13 +1,14 @@
 from datetime import date, timedelta
 import time
 import pandas as pd
-from amzService import AmzService
+#from amzService import AmzService
+from amzService2 import getFinancialEventGroups
 
 class FinancialEventsService:
     
     # Test getting financial events for yesterday
     # this might be useful for figuring out what i made yesterday
-    service = AmzService()
+    #service = AmzService()
 
     # https://advertising.amazon.com/about-api
 
@@ -38,7 +39,7 @@ class FinancialEventsService:
             nextToken = nextToken.values[0:1][0]
         while nextToken:
             print('getting the next token response...')
-            detailedDf = self.service.getFinancialEventGroups(date.today() - timedelta(days=14), None, financialEventGroupId, nextToken)
+            detailedDf = getFinancialEventGroups(date.today() - timedelta(days=14), None, financialEventGroupId, nextToken)
             order_array.append(self.getOrdersForDataframe(detailedDf, order_array))
             nextToken = detailedDf.get('NextToken')
             if nextToken is not None:
@@ -55,7 +56,7 @@ class FinancialEventsService:
         print("Trying to get open payments...")
         print('Getting payments from: ' + str(date.today() - timedelta(days=14)))
 
-        df = self.service.getFinancialEventGroups(date.today() - timedelta(days=14), None, None, None)
+        df = getFinancialEventGroups(date.today() - timedelta(days=14), None, None, None)
         financialEventGroupIds = []
         eventGroups = df.values[0:1][0][0:1][0]
 
@@ -75,7 +76,7 @@ class FinancialEventsService:
                 # get event group detail by eventgroupid
                 order_array = []
                 
-                detailedDf = self.service.getFinancialEventGroups(date.today() - timedelta(days=14), None, financialEventGroupId, None)
+                detailedDf = getFinancialEventGroups(date.today() - timedelta(days=14), None, financialEventGroupId, None)
                 order_array = self.getOrdersForDataframe(detailedDf, order_array)
                 
                 # if it has a nexttoken, retrieve those results as well

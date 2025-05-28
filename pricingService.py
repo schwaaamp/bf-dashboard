@@ -1,4 +1,5 @@
-from amzService import AmzService
+#from amzService import AmzService
+from amzService2 import getPricing
 import pandas as pd
 import time
 
@@ -7,7 +8,7 @@ class PricingService:
     
     def getPricingByAsin(self, asins):
        # Need to split asins into lists of 20 then combine the results
-        amzService = AmzService()
+        #amzService = AmzService()
         pricingDf = pd.DataFrame()
 
         for i in range(0, len(asins), 20):
@@ -19,7 +20,7 @@ class PricingService:
                 asin_param += asin + ','
 
             asin_param = asin_param[:-1]   #remove trailing ,
-            df = amzService.getPricing(asin_param)
+            df = getPricing(asin_param)
             df.columns = ['ASIN', 'Status', 'Competitive Pricing', 'NumberOfOfferListings', 'MarketplaceId', 'IdentifiersAsin', 'SalesRankings']
             slimDf = df[['ASIN', 'Status', 'Competitive Pricing', 'SalesRankings']].copy()
             time.sleep(.5)

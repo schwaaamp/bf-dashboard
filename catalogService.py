@@ -1,7 +1,8 @@
 from datetime import date, timedelta
 import pandas as pd
 import numpy as np
-from amzService import AmzService
+#from amzService import AmzService
+from amzService2 import getCatalogItems
 from pricingService import PricingService
 from utils.searchTerms import searchTerms
 
@@ -9,14 +10,14 @@ class CatalogService:
     
     
     def getSearchResults(self):
-        service = AmzService()
+        #service = AmzService()
         pricingService = PricingService()
         df = pd.DataFrame()
         asins = []
         
         for term in searchTerms.values():
             ranking = 0
-            result =  service.getCatalogItems(term)
+            result =  getCatalogItems(term)
             numResults = result['numberOfResults']
             items = result['items'].values[0:1][0]
         

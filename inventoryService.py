@@ -3,16 +3,17 @@ from datetime import date, timedelta
 import pandas as pd
 import numpy as np
 import time
-from amzService import AmzService
+#from amzService import AmzService
+from amzService2 import getInventory
 from salesService import SalesService
 
 class InventoryService:
 
-    service = AmzService()
+    #service = AmzService()
     salesService = SalesService()
 
     def getInventoryNeeds(self):
-        inventoryDf = self.service.getInventory()
+        inventoryDf = getInventory()
         num_weeks=8
         eight_weeks = date.today() - timedelta(weeks=num_weeks)
         eight_start = eight_weeks - timedelta(days=eight_weeks.weekday())

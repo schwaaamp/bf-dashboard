@@ -4,7 +4,8 @@ import time
 from datetime import date, timedelta
 from pathlib import Path
 import pandas as pd
-from amzService import AmzService
+#from amzService import AmzService
+from amzService2 import getSales
 from asinSkuUtil import asinSkuMapper
 from asinNameUtil import asinNames
 
@@ -99,8 +100,8 @@ class SalesService:
         time.sleep(.5)
         #try:
         print('Getting sales from Amazon for ' + start + ' - ' + end + ' for asin: ' + asin + ' and granularity: ' + gran + '...')
-        service = AmzService()
-        df = service.getSales(asin, start, end, gran)
+        #service = AmzService()
+        df = getSales(asin, start, end, gran)
         #except: 
         #    service.refreshAccessToken()
         #    df = service.getSales(asin, start, end, gran)

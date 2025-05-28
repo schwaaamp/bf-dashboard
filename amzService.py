@@ -5,30 +5,51 @@ import logging
 import pandas as pd
 import requests
 import urllib.parse
+from sp_api.api import Sales
+from sp_api.base import Granularity
+from sp_api.base.marketplaces import Marketplaces
+
+
+
+load_dotenv()  # loads variables from .env into environment
 
 class AmzService:
     
-    load_dotenv()  # loads variables from .env into environment
 
     # Get Sales data from AMZ
     token_response = ''
-    endpoint = ''
-    marketplace_id = ''
+    endpoint = "https://sellingpartnerapi-na.amazon.com"
+    marketplace_id = "ATVPDKIKX0DER"
     access_token = ''
     
+    """
     def __init__(self):
         # Getting LWA access token using the app credentials. Valid for 1 hour until it expires
-        self.token_response = requests.post(
-            "https://api.amazon.com/auth/o2/token",
-            data={
-                "grant_type": "refresh_token",
-                "refresh_token": os.getenv("refresh_token"),
-                "client_id": os.getenv("lwa_app_id"),
-                "client_secret": os.getenv("lwa_client_secret"),
-            },
-        )
         
-        self.access_token = self.token_response.json()["access_token"]
+        print(os.getenv("LWA_REFRESH_TOKEN"))
+        print(os.getenv("LWA_APP_ID"))
+        print(os.getenv("LWA_CLIENT_SECRET"))
+        
+        def __init__(self):
+            # Request Amazon LWA token
+            self.token_response = requests.post(
+                "https://api.amazon.com/auth/o2/token",
+                data={
+                    "grant_type": "refresh_token",
+                    "refresh_token": os.getenv("LWA_REFRESH_TOKEN"),
+                    "client_id": os.getenv("LWA_APP_ID"),
+                    "client_secret": os.getenv("LWA_CLIENT_SECRET"),
+                },
+            )
+
+        # Log the response for debugging
+        print("Amazon token response:", self.token_response.status_code, self.token_response.text)
+
+        # Safely extract token or raise an error
+        if self.token_response.status_code == 200:
+            self.access_token = self.token_response.json().get("access_token")
+        else:
+            raise Exception("Failed to obtain Amazon access token.")
 
         #NA endpoint
         self.endpoint = "https://sellingpartnerapi-na.amazon.com"
@@ -37,51 +58,66 @@ class AmzService:
         #CA A2EUQ1WTGCTBG2
         #MX
         
-        
+    """ 
     
     def refreshAccessToken(self):
         self.access_token = self.token_reponse.json()["access_token"]
 
     # Postman: https://web.postman.co/workspace/My-Workspace~de12e46a-9cda-49b3-8350-c829508bdc38/request/15615900-7bc16135-483c-4bf8-9ed0-a07be598e199
     def getSales(self, asin, start, end, granularity):
-        
-        if self.access_token is None:
-            print("access token is none. refreshing...")
-            refreshAccessToken()
-        
-        request_params = {
-            "marketplaceIds": self.marketplace_id,
-        }
+        # Ensure access token is available
+        """
+        if not self.access_token:
+            logging.warning("Access token is None. Refreshing...")
+            self.refreshAccessToken()  # Assumes this method exists
+"""
+        # Build request parameters
+        params = {"marketplaceIds": self.marketplace_id}
+        interval = ''
         if asin:
-            request_params['asin'] = asin
+            params["asin"] = asin
         if start and end:
-            interval = str(start) + 'T00:00:00-05:00--' + str(end) + 'T23:59:59-05:00'
-            request_params['interval'] = interval
+            interval = f"{start}T00:00:00Z--{end}T23:59:59Z"
+            interval="2024-09-01T00:00:00-07:00–2024-09-04T00:00:00-07:00"
+            print(interval)
+            params["interval"] = f"{start}T00:00:00-05:00--{end}T23:59:59-05:00"
         if granularity:
-            request_params['granularity'] = granularity
+            params["granularity"] = granularity
 
-        logging.info('Calling AMZ for ' + str(request_params))
+        url = f"{self.endpoint}/sales/v1/orderMetrics"
+        headers = {"x-amz-access-token": self.access_token}
+
+        logging.info(f"Calling Amazon SP API with params: {params}")
 
         try:
-            sales = requests.get(
-                self.endpoint + "/sales/v1/orderMetrics"
-                + "?"
-                + urllib.parse.urlencode(request_params),
-                headers={
-                    "x-amz-access-token": self.access_token,
-                },
+            print(interval)
+            sales_api = Sales(marketplace=Marketplaces.US)
+            response = sales_api.get_order_metrics(
+                granularity=Granularity.TOTAL,
+                granularityTimeZone='US/Eastern'
+                #asin=asin,
+                interval=interval,
             )
-        except:
-            print("Something failed on the Amazon SP API service call")
-        
-        if(sales is not None and sales.status_code == 200):
-            logging.info('AMZ SP API status code: ' + str(sales.status_code))
-            df = pd.json_normalize(sales.json()['payload'])
+            
+            print(response)
+            return response
+            
+            #response = requests.get(url, headers=headers, params=params)
+            #response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Amazon SP API request failed: {e}")
+            raise RuntimeError("Amazon SP API call failed") from e
+
+        logging.info(f"Amazon SP API response status: {response.status_code}")
+
+        try:
+            payload = response.json().get("payload", [])
+            df = pd.json_normalize(payload)
             return df
-        else:
-            logging.error('AMZ SP API getSales() status code: '+ str(sales.status_code) + ' params: ' + str(request_params))
-            raise ValueError(sales.status_code)
-    
+        except (ValueError, KeyError) as e:
+            logging.error(f"Failed to parse API response: {e}")
+            raise
+        
 
 
 
@@ -121,44 +157,42 @@ class AmzService:
     
     # This is a multi-use function. It retrieves FinancialEventGroups and also orders that are part of a specific FinancialEventGroupId.
     # The latter requires a path variable (eventGroupId) and paginates results every 100 orders via NextToken
-    def getFinancialEventGroups(self, start, end, eventGroupId, nextToken):
-        
-        request_params = {}
+    def getFinancialEventGroups(self, start=None, end=None, eventGroupId=None, nextToken=None):
+        # Build request parameters
+        params = {}
         if start:
-            request_params['FinancialEventGroupStartedAfter'] = str(start) + 'T00:00:00-05:00'
+            params["FinancialEventGroupStartedAfter"] = f"{start}T00:00:00-05:00"
         if end:
-            request_params['FinancialEventGroupStartedBefore'] = str(end) + 'T23:59:59-05:00'
+            params["FinancialEventGroupStartedBefore"] = f"{end}T23:59:59-05:00"
         if nextToken:
-            request_params['NextToken'] = nextToken
-        
-        # Path variable
-        eventGroupIdPath = ''
-        if eventGroupId:
-            eventGroupIdPath = '/' + eventGroupId +'/financialEvents'
+            params["NextToken"] = nextToken
 
-        logging.info('Calling AMZ for ' + str(request_params))
+        # Determine endpoint path
+        event_group_path = f"/{eventGroupId}/financialEvents" if eventGroupId else ""
+
+        url = f"{self.endpoint}/finances/v0/financialEventGroups{event_group_path}"
+        headers = {"x-amz-access-token": self.access_token}
+
+        logging.info(f"Calling Amazon SP API Financial Event Groups with params: {params}")
 
         try:
-            financialEventGroups = requests.get(
-                self.endpoint + "/finances/v0/financialEventGroups"
-                + eventGroupIdPath
-                + "?"
-                + urllib.parse.urlencode(request_params),
-                headers={
-                    "x-amz-access-token": self.access_token,
-                },
-            )
-        except:
-            print("Something failed on the Amazon SP API Financial Event Groups service call")
-        
-        if(financialEventGroups is not None and financialEventGroups.status_code == 200):
-            logging.info('AMZ SP API Financial Events Groups status code: ' + str(financialEventGroups.status_code))
-            df = pd.json_normalize(financialEventGroups.json()['payload'])
+            response = requests.get(url, headers=headers, params=params)
+            response.raise_for_status()
+
+            payload = response.json().get("payload", [])
+            df = pd.json_normalize(payload)
+            logging.info(f"AMZ SP API Financial Event Groups success. Status code: {response.status_code}")
             return df
-        else:
-            print('AMZ SP API Financial Events Groups status code: '+ str(financialEventGroups.status_code))
-            logging.error('AMZ SP API getFinancialEventGroups() status code: '+ str(financialEventGroups.status_code))
-            return pd.DataFrame()
+
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Amazon SP API Financial Event Groups request failed: {e}")
+        except ValueError as e:
+            logging.error(f"Error parsing JSON response: {e}")
+        except Exception as e:
+            logging.error(f"Unexpected error in getFinancialEventGroups: {e}")
+
+        # On failure, return empty DataFrame
+        return pd.DataFrame()
 
 
 

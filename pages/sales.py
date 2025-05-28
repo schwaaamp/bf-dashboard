@@ -7,7 +7,8 @@ import plotly.express as px
 from datetime import date, timedelta, datetime
 from asinSkuUtil import asinSkuMapper
 from asinNameUtil import asinNames
-from amzService import AmzService
+#from amzService import AmzService
+from amzService2 import getSales
 from salesService import SalesService
 
 dash.register_page(
@@ -22,15 +23,15 @@ import warnings
 warnings.filterwarnings("ignore")
 
 salesService = SalesService()
-amzService = AmzService()
+#amzService = AmzService()
 salesDf = pd.DataFrame()
 
 
 # ===================== TODAY'S SALES ==============================
 def getSalesForToday():
     print('Getting sales for today ... ' + str(pd.Timestamp.now()))
-    amzService = AmzService()
-    df = amzService.getSales('', date.today(), date.today(), 'Day')
+    #amzService = AmzService()
+    df = getSales('', date.today(), date.today(), 'Day')
     df.columns = ['Day', 'Unit Count', 'Order Item Count', 'Order Count', 'Avg Unit Price', 'Currency', 'Total Sales', 'Currency2']
     
     return dbc.Row(
@@ -90,9 +91,9 @@ def getSalesForDatePicker(start, end, asin, granularity):
     prev_start = datetime.strftime(pd.Timestamp(start) + offset, '%Y-%m-%d')
     prev_end = datetime.strftime(pd.Timestamp(end) + offset, '%Y-%m-%d')
     
-    amzService = AmzService()
+    #amzService = AmzService()
     # Consider getting previous year sales by ASIN so the filter works on the graph
-    prev_df = amzService.getSales('', prev_start, prev_end, granularity)
+    prev_df = getSales('', prev_start, prev_end, granularity)
     prev_df['Week'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%V'), axis=1)
     prev_df['Month'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%b'), axis=1)
     prev_df['Year'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%Y'), axis=1)
