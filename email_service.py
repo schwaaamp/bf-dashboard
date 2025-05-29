@@ -51,14 +51,17 @@ def send_weekly_email():
         print(f"Error: {e}")
 
 # Schedule for every Monday at 9:00 AM
+# Commented out in place of a cron job to handle this
+"""
 schedule.every().monday.at("7:00").do(send_weekly_email)
 
 while True:
     schedule.run_pending()
     time.sleep(3000)  # Check every hour
-    
+ 
 # Test the function directly without scheduling
 if __name__ == "__main__":
     print("Testing email function directly...")
     send_weekly_email()
     print("Direct test complete")
+"""

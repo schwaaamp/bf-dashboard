@@ -1,0 +1,15 @@
+
+
+============== PROD DEPLOY ===================================================================================
+
+When doing a deploy, the Render start command must be:
+gunicorn app:server
+
+This tells gunicorn:
+“Look in app.py, and use the server object (which is your Flask instance) to serve requests.”
+
+Why?
+Dash wraps a Flask app internally. When you do:
+app = Dash(...)
+server = app.server
+You're exposing the underlying Flask app (app.server) so that tools like gunicorn can serve it.
