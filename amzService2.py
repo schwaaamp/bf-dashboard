@@ -227,3 +227,40 @@ def getPricing(asins):
     #return response.json()
     df = pd.json_normalize(response.json()['payload'])
     return df
+
+
+
+def getFbaShipments(asins):
+    access_token = get_lwa_access_token()
+
+    region = "us-east-1"
+    service = "execute-api"
+    host = "sellingpartnerapi-na.amazon.com"
+    endpoint = f"https://{host}/fba/inbound/v0/shipments?"
+
+    params = {
+        "MarketplaceId": "ATVPDKIKX0DER",
+        #"Asins": ','.join(asins), #list of up to 20 asins
+        "Asins": asins,
+        "ItemType": "Asin",
+    }
+
+    auth = AWSRequestsAuth(
+        aws_access_key=os.getenv("AWS_ACCESS_KEY"),
+        aws_secret_access_key=os.getenv("AWS_SECRET_KEY"),
+        aws_token=None,  # If using session tokens
+        aws_host=host,
+        aws_region=region,
+        aws_service=service,
+    )
+
+    headers = {
+        "x-amz-access-token": access_token,
+        "Content-Type": "application/json",
+    }
+
+    response = requests.get(endpoint, headers=headers, params=params, auth=auth)
+    response.raise_for_status()
+    #return response.json()
+    df = pd.json_normalize(response.json()['payload'])
+    return df
