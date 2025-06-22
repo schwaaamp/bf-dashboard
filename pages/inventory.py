@@ -11,11 +11,12 @@ from inventoryService import InventoryService
 from dotenv import load_dotenv
 import os
 import logging
+import warnings
 
 
 
 load_dotenv()  # loads variables from .env into environment
-
+warnings.filterwarnings("ignore")
 
 
 dash.register_page(
@@ -25,17 +26,8 @@ dash.register_page(
     path="/inventory",
 )
 
-import warnings
-
-warnings.filterwarnings("ignore")
-
 # ===================== Get Inventory ==============================
-def getInventory():
-    logging.info('Getting inventory...')
-    inventoryService = InventoryService()
-    inventoryDf = inventoryService.getInventoryNeeds()
-    logging.info('Inventory service results:')
-    logging.info(inventoryDf)
+def get_inventory_component(inventoryDf):
     columnDefs = [
         { 'field': 'ASIN'},
         { 'field': 'Available', "type": "numericColumn"},
@@ -73,31 +65,34 @@ def getInventory():
     #print(message.content)
     # end anthropic
     
-    logging.info('Returning the updated dataframe...')
     return dbc.Col(grid, className='col-sm')
 
 
 
 
 # layout
-def layout():
-    return dbc.Container(
-        [
-            html.Div(
-                [
-                    html.H2(
-                        "Inventory",  # title
-                        className="title",
-                    ),
-                    html.Br(),
-                    dbc.Row([
-                        getInventory(),
-                    ]),
-                    html.Br(),
-                    html.Br(),
-                ],
-                className="page-content",
-            )
-        ],
-        fluid=True,
-    )
+layout = dbc.Container(
+    [
+        html.Div(
+            [
+                html.H2("Inventory", className="title"),
+                html.Br(),
+                dcc.Interval(id="refresh-inventory", interval=100, n_intervals=0, max_intervals=1),
+                html.Div(id="inventory-output"),
+                html.Br(),
+                html.Br(),
+            ],
+            className="page-content",
+        )
+    ],
+    fluid=True,
+)
+
+
+# Callback
+@callback(Output("inventory-output", "children"), Input("refresh-inventory", "n_intervals"))
+def update_inventory(n):
+    inventoryService = InventoryService()
+    inventoryDf = inventoryService.getInventoryNeeds()
+    logging.info(inventoryDf)
+    return get_inventory_component(inventoryDf)

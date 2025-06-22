@@ -8,6 +8,9 @@ import plotly.express as px
 from asinSkuUtil import asinSkuMapper
 from asinNameUtil import asinNames
 from catalogService import CatalogService
+import warnings
+
+warnings.filterwarnings("ignore")
 
 dash.register_page(
     __name__,
@@ -16,15 +19,8 @@ dash.register_page(
     path="/competition",
 )
 
-import warnings
-
-warnings.filterwarnings("ignore")
-
 # ===================== Show organic search results for terms ==============================
-def showOrganicSearch():
-    catalogService = CatalogService()
-    df_list = catalogService.getSearchResults()
-    
+def get_competition_component(df_list):
     columnDefs = [
         #{ 'field': 'ASIN'},
         { 'field': 'Ranking', 'headerName':'#'},
@@ -85,55 +81,9 @@ layout = dbc.Container(
                     className="title",
                 ),
                 html.Br(),
-                showOrganicSearch(),
+                dcc.Interval(id="refresh-competition", interval=100, n_intervals=0, max_intervals=1),
+                html.Div(id="competition-output"),
                 html.Br(),
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            create_card("Purchases", "purchases-card", "fa-list", "Chilfdren"),
-                            width=4,
-                        ),
-                        dbc.Col(
-                            create_card("Total Spend", "spend-card", "fa-coins", "Chilfdren"),
-                            width=4,
-                        ),
-                        dbc.Col(
-                            create_card("Top Category", "category-card", "fa-tags", "Chilfdren"),
-                            width=4,
-                        ),
-                    ],
-                ),
-                html.Br(),
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            dcc.Loading(
-                                dcc.Graph(
-                                    id="sales-chart",
-                                    config={"displayModeBar": False},
-                                    className="chart-card",
-                                    style={"height": "400px"},
-                                ),
-                                type="circle",
-                                color="#f79500",
-                            ),
-                            width=6,
-                        ),
-                        dbc.Col(
-                            dcc.Loading(
-                                dcc.Graph(
-                                    id="category-chart",
-                                    config={"displayModeBar": False},
-                                    className="chart-card",
-                                    style={"height": "400px"},
-                                ),
-                                type="circle",
-                                color="#f79500",
-                            ),
-                            width=6,
-                        ),
-                    ],
-                ),
             ],
             className="page-content",
         )
@@ -141,3 +91,9 @@ layout = dbc.Container(
     fluid=True,
 )
 
+# Callback
+@callback(Output("competition-output", "children"), Input("refresh-competition", "n_intervals"))
+def update_competition(n):
+    catalogService = CatalogService()
+    df_list = catalogService.getSearchResults()
+    return get_competition_component(df_list)

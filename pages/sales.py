@@ -97,7 +97,6 @@ def getSalesForDatePicker(start, end, asin, granularity):
     prev_df['Week'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%V'), axis=1)
     prev_df['Month'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%b'), axis=1)
     prev_df['Year'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%Y'), axis=1)
-    print(prev_df)
             
     if granularity == 'Week':
         df = df.groupby(['Week', 'ASIN', 'Product', 'Year'], sort=False, observed=True)['Sales'].sum().reset_index()
@@ -110,7 +109,6 @@ def getSalesForDatePicker(start, end, asin, granularity):
         granularity = 'Date'
 
     
-    #print(df)
     salesDf = df
     
     bar_chart = px.bar(df, x=granularity, y="Sales", color="Product", barmode="stack", template="minty")
