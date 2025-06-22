@@ -8,12 +8,14 @@ from datetime import datetime
 from inventoryService import InventoryService
 from dotenv import load_dotenv
 import os
+import logging
 
 
 load_dotenv()  # loads variables from .env into environment
 
 
 def send_weekly_email():
+    logging.info('Kicking off the email function...')
     sender_email = os.getenv("EMAIL_ADDRESS")
     sender_password = os.getenv("EMAIL_PASSWORD")
     recipient_email = os.getenv("RECIPIENT_EMAIL")
@@ -23,8 +25,12 @@ def send_weekly_email():
     message["To"] = recipient_email
     message["Subject"] = f"Inventory report - {datetime.now().strftime('%B %d, %Y')}"
     
+    logging.info('Retrieving inventory for the email...')
     inventoryService = InventoryService()
     inventoryDf = inventoryService.getInventoryNeeds()
+    
+    logging.info('Inventory results: ')
+    logging.info(inventoryDf)
     df_html = inventoryDf.to_html(index=False, table_id="data-table")
 
     # Combine heading and table into one HTML message body
@@ -41,6 +47,7 @@ def send_weekly_email():
     message.attach(MIMEText(html_body, "html"))
     
     try:
+        logging.info('Sending the email...')
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
         server.login(sender_email, sender_password)
