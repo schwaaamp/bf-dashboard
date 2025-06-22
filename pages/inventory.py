@@ -7,9 +7,10 @@ import pandas as pd
 import plotly.express as px
 from datetime import date, timedelta
 from inventoryService import InventoryService
-import anthropic
+#import anthropic
 from dotenv import load_dotenv
 import os
+import logging
 
 
 
@@ -30,8 +31,11 @@ warnings.filterwarnings("ignore")
 
 # ===================== Get Inventory ==============================
 def getInventory():
+    logging.info('Getting inventory...')
     inventoryService = InventoryService()
     inventoryDf = inventoryService.getInventoryNeeds()
+    logging.info('Inventory service results:')
+    logging.info(inventoryDf)
     columnDefs = [
         { 'field': 'ASIN'},
         { 'field': 'Available', "type": "numericColumn"},
@@ -44,6 +48,7 @@ def getInventory():
         },
     ]
 
+    logging.info('Setting the AgGrid with updated dataframe...')
     grid = dag.AgGrid(
         id="inventoryNeeds",
         rowData=inventoryDf.to_dict("records"),
@@ -55,9 +60,9 @@ def getInventory():
     
     
     # start anthropic
-    client = anthropic.Anthropic(
-        api_key=os.getenv('bf_dashboard_anthropic_key')
-    )
+    #client = anthropic.Anthropic(
+    #    api_key=os.getenv('bf_dashboard_anthropic_key')
+    #)
     #message = client.messages.create(
     #    model="claude-3-5-haiku-20241022",
     #    max_tokens=1024,
@@ -68,6 +73,7 @@ def getInventory():
     #print(message.content)
     # end anthropic
     
+    logging.info('Returning the updated dataframe...')
     return dbc.Col(grid, className='col-sm')
 
 
