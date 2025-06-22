@@ -80,23 +80,24 @@ def getInventory():
 
 
 # layout
-layout = dbc.Container(
-    [
-        html.Div(
-            [
-                html.H2(
-                    "Inventory",  # title
-                    className="title",
-                ),
-                html.Br(),
-                dbc.Row([
-                    getInventory(),
-                ]),
-                html.Br(),
-                html.Br(),
-            ],
-            className="page-content",
-        )
-    ],
-    fluid=True,
-)
+def layout():
+    return dbc.Container(
+        [
+            html.Div(
+                [
+                    html.H2(
+                        "Inventory",  # title
+                        className="title",
+                    ),
+                    html.Br(),
+                    dbc.Row([
+                        getInventory(),
+                    ]),
+                    html.Br(),
+                    html.Br(),
+                ],
+                className="page-content",
+            )
+        ],
+        fluid=True,
+    )
