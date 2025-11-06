@@ -35,7 +35,8 @@ nest-asyncio==1.6.0
 numpy==2.0.2
 packaging==24.1
 pandas==2.2.2
-plotly==5.23.0
+#plotly==5.23.0
+plotly==6.4.0
 pydantic==2.11.5
 pydantic_core==2.33.2
 python-dateutil==2.9.0.post0
