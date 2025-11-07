@@ -96,8 +96,8 @@ class SalesService:
 
 
     def getSalesFromAmz(self, asin, start, end, gran):
-        # Adding delay to try to prevent 529s
-        time.sleep(.5)
+        # Adding delay to try to prevent 429s
+        time.sleep(1)
         #try:
         #print('Getting sales from Amazon for ' + start + ' - ' + end + ' for asin: ' + asin + ' and granularity: ' + gran + '...')
         #service = AmzService()
