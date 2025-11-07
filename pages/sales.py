@@ -111,6 +111,8 @@ def getSalesForDatePicker(start, end, asin, granularity):
     
     salesDf = df
     
+    print(df)
+    
     bar_chart = px.bar(df, x=granularity, y="Sales", color="Product", barmode="stack", template="minty")
     bar_chart.layout.xaxis.fixedrange = True
     bar_chart.layout.yaxis.fixedrange = True
