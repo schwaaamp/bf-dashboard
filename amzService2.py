@@ -8,8 +8,16 @@ from aws_requests_auth.aws_auth import AWSRequestsAuth
 
 load_dotenv()
 
+_cached_token = None
+_token_expiry = None
+
 # Step 1: Get access token from LWA
 def get_lwa_access_token():
+    global _cached_token, _token_expiry
+
+    if _cached_token and _token_expiry and datetime.datetime.now() < _token_expiry:
+        return _cached_token
+
     response = requests.post(
         "https://api.amazon.com/auth/o2/token",
         data={
@@ -21,7 +29,10 @@ def get_lwa_access_token():
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
     response.raise_for_status()
-    return response.json()["access_token"]
+    payload = response.json()
+    _cached_token = payload["access_token"]
+    _token_expiry = datetime.datetime.now() + datetime.timedelta(seconds=payload["expires_in"] - 60)
+    return _cached_token
 
 # Step 2: Sign and send Sales API request
 def getSales(asin, start_date, end_date, granularity):
