@@ -1,17 +1,35 @@
-import schedule
-import time
+import math
 import smtplib
 import os
+import logging
+import pandas as pd
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from inventoryService import InventoryService
+from salesService import SalesService
+from asinNameUtil import asinNames
+from asinSkuUtil import asinSkuMapper
 from dotenv import load_dotenv
-import os
-import logging
+
+load_dotenv()
 
 
-load_dotenv()  # loads variables from .env into environment
+def get_weekly_sales():
+    salesService = SalesService()
+    end = date.today() - timedelta(days=1)   # yesterday
+    start = end - timedelta(days=6)          # 7 days back
+    rows = []
+    for asin in asinSkuMapper.keys():
+        df = salesService.getSalesByDay(asin, start, end)
+        if df is not None and not df.empty:
+            rows.append({
+                'ASIN': asin,
+                'Product': asinNames.get(asin, asin),
+                'Units Sold': int(df['Unit Count'].sum()),
+                'Revenue': df['Sales'].sum()
+            })
+    return pd.DataFrame(rows).sort_values('Revenue', ascending=False)
 
 
 def send_weekly_email():
@@ -19,33 +37,59 @@ def send_weekly_email():
     sender_email = os.getenv("EMAIL_ADDRESS")
     sender_password = os.getenv("EMAIL_PASSWORD")
     recipient_email = os.getenv("RECIPIENT_EMAIL")
-    
+
     message = MIMEMultipart("alternative")
     message["From"] = sender_email
     message["To"] = recipient_email
-    message["Subject"] = f"Inventory report - {datetime.now().strftime('%B %d, %Y')}"
-    
-    logging.info('Retrieving inventory for the email...')
-    inventoryService = InventoryService()
-    inventoryDf = inventoryService.getInventoryNeeds()
-    
-    logging.info('Inventory results: ')
-    logging.info(inventoryDf)
-    df_html = inventoryDf.to_html(index=False, table_id="data-table")
+    message["Subject"] = f"Weekly Amazon Report - {datetime.now().strftime('%B %d, %Y')}"
 
-    # Combine heading and table into one HTML message body
+    # --- Sales section ---
+    logging.info('Retrieving last 7 days of sales...')
+    sales_df = get_weekly_sales()
+    sales_df['Revenue'] = sales_df['Revenue'].apply(lambda x: f'${x:,.2f}')
+    sales_html = sales_df.to_html(index=False, table_id="sales-table")
+
+    # --- Replenishment section ---
+    logging.info('Retrieving inventory...')
+    inventoryService = InventoryService()
+    inv_df = inventoryService.getInventoryNeeds()
+    inv_df['Product'] = inv_df['ASIN'].map(asinNames)
+
+    restock_df = inv_df[inv_df['Weeks On Hand'] < 6].copy()
+    restock_df['Suggested Order'] = restock_df.apply(
+        lambda r: math.ceil((12 - r['Weeks On Hand']) * r['Week Average'] / 10) * 10,
+        axis=1
+    )
+    restock_df = restock_df[['ASIN', 'Product', 'Weeks On Hand', 'Week Average', 'Suggested Order']]
+
+    if restock_df.empty:
+        restock_html = '<p style="color: green;">&#10003; All products are well-stocked (6+ weeks on hand).</p>'
+    else:
+        restock_html = restock_df.to_html(index=False, table_id="restock-table")
+
     html_body = f"""
     <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; color: #333; }}
+            table {{ border-collapse: collapse; width: 100%; margin-bottom: 24px; }}
+            th, td {{ border: 1px solid #ddd; padding: 8px 12px; text-align: left; }}
+            th {{ background-color: #f2f2f2; font-weight: bold; }}
+            tr:nth-child(even) {{ background-color: #f9f9f9; }}
+            h2 {{ color: #333; border-bottom: 2px solid #ddd; padding-bottom: 6px; }}
+        </style>
+    </head>
     <body>
-        <p>Inventory needs as of {datetime.now().strftime('%B %d, %Y')}:</p>
-        {df_html}
+        <h2>Sales &mdash; Last 7 Days</h2>
+        {sales_html}
+        <h2>Replenishment Needed (&lt;6 Weeks On Hand)</h2>
+        {restock_html}
     </body>
     </html>
     """
 
-    # Attach combined HTML
     message.attach(MIMEText(html_body, "html"))
-    
+
     try:
         logging.info('Sending the email...')
         server = smtplib.SMTP("smtp.gmail.com", 587)
@@ -55,20 +99,11 @@ def send_weekly_email():
         server.quit()
         print(f"Email sent at {datetime.now()}")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error sending email: {e}")
+        logging.error(f"Error sending email: {e}")
 
-# Schedule for every Monday at 9:00 AM
-# Commented out in place of a cron job to handle this
-"""
-schedule.every().monday.at("7:00").do(send_weekly_email)
 
-while True:
-    schedule.run_pending()
-    time.sleep(3000)  # Check every hour
- 
-# Test the function directly without scheduling
 if __name__ == "__main__":
     print("Testing email function directly...")
     send_weekly_email()
     print("Direct test complete")
-"""
