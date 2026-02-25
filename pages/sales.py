@@ -99,7 +99,8 @@ def getSalesForDatePicker(start, end, asin, granularity):
     prev_df['Year'] = prev_df.apply(lambda row: date.fromisoformat(row.interval.split("T")[0]).strftime('%Y'), axis=1)
             
     if granularity == 'Week':
-        df = df.groupby(['Week', 'ASIN', 'Product', 'Year'], sort=False, observed=True)['Sales'].sum().reset_index()
+        df = df.groupby(['Week', 'ASIN', 'Product', 'Year'], sort=True, observed=True)['Sales'].sum().reset_index()
+        df.sort_values(by=['Year', 'Week'], inplace=True)
     elif granularity == 'Month':
         df = df.groupby(['Month', 'ASIN', 'Product'], sort=False, observed=True)['Sales'].sum().reset_index()
         df['Month'] = pd.Categorical(df['Month'], categories=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], ordered=True)
@@ -118,6 +119,7 @@ def getSalesForDatePicker(start, end, asin, granularity):
     bar_chart.layout.yaxis.fixedrange = True
     #bar_chart.update_layout(showlegend = False)
     
+    prev_df.sort_values(by='Week', inplace=True)
     line_chart = px.line(prev_df, x=granularity, y="totalSales.amount").update_traces(patch={"line": {"color": "#a569bd", "dash": 'dot'}})
     line_chart.update_traces(name='Previous Year', showlegend=True)
     bar_chart.add_traces(line_chart.data)
