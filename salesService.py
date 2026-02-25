@@ -1,6 +1,3 @@
-import csv
-import datetime
-import time
 from datetime import date, timedelta
 from pathlib import Path
 import pandas as pd
@@ -54,24 +51,40 @@ class SalesService:
         if sales_file.is_file():
             f = pd.read_csv(sales_file, delimiter='\t')
             delta = end - start
-            results = pd.DataFrame()
 
-            for i in range(delta.days + 1):
-                day = str(start + datetime.timedelta(days=i))
-                if day in f['Date'].values:
-                    record = f.loc[f['Date'] == day]
-                    results = pd.concat([results, record])
-                else:
-                    # Only want to call Amazon if day is > first date in the file (when item launched)
-                    if day > f['Date'].iloc[0]:
-                        df = self.getSalesFromAmz(asin, day, day, 'Day')
-                        df_clean = pd.DataFrame({"Date":df['interval'].str.slice(0,10), "Unit Count":df['unitCount'], "Order Count":df['orderCount'], "Sales":df['totalSales.amount']})
-                        results = pd.concat([results, df_clean])
-                        if day != str(date.today()):
-                            print('Adding ' + day + ' to ' + str(sales_file))
-                            # mode='a' appends this dataframe to the existing file
-                            df_clean.to_csv('csvs/' + sku + '.csv', sep='\t', encoding='utf-8', index=False, header=False, mode='a')
-            return results
+            existing_dates = set(f['Date'].values)
+            launch_date = f['Date'].iloc[0]
+            today = str(date.today())
+            requested_dates = set(
+                str(start + timedelta(days=i))
+                for i in range(delta.days + 1)
+            )
+
+            missing_days = sorted([
+                d for d in requested_dates
+                if d not in existing_dates and d > launch_date
+            ])
+
+            df_new = pd.DataFrame()
+            if missing_days:
+                batch_start = missing_days[0]
+                batch_end   = missing_days[-1]
+                print(f'Fetching {len(missing_days)} missing days for {sku} ({batch_start} to {batch_end})')
+                raw = self.getSalesFromAmz(asin, batch_start, batch_end, 'Day')
+                df_new = pd.DataFrame({
+                    "Date":        raw['interval'].str.slice(0, 10),
+                    "Unit Count":  raw['unitCount'],
+                    "Order Count": raw['orderCount'],
+                    "Sales":       raw['totalSales.amount']
+                })
+                to_save = df_new[df_new['Date'] != today]
+                if not to_save.empty:
+                    print(f'Adding {len(to_save)} days to {sales_file}')
+                    to_save.to_csv('csvs/' + sku + '.csv', sep='\t', encoding='utf-8', index=False, header=False, mode='a')
+
+            csv_results = f[f['Date'].isin(requested_dates)]
+            new_results  = df_new[df_new['Date'].isin(set(missing_days))] if not df_new.empty else pd.DataFrame()
+            return pd.concat([csv_results, new_results])
         else:
             print('File does not exist')
             # Create sales.csv file
@@ -96,8 +109,6 @@ class SalesService:
 
 
     def getSalesFromAmz(self, asin, start, end, gran):
-        # Adding delay to try to prevent 429s
-        time.sleep(1)
         #try:
         #print('Getting sales from Amazon for ' + start + ' - ' + end + ' for asin: ' + asin + ' and granularity: ' + gran + '...')
         #service = AmzService()
