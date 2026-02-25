@@ -117,6 +117,7 @@ def getSalesForDatePicker(start, end, asin, granularity):
     bar_chart = px.bar(df, x=granularity, y="Sales", color="Product", barmode="stack", template="minty")
     bar_chart.layout.xaxis.fixedrange = True
     bar_chart.layout.yaxis.fixedrange = True
+    bar_chart.update_xaxes(categoryorder='category ascending')
     #bar_chart.update_layout(showlegend = False)
     
     prev_df.sort_values(by='Week', inplace=True)
