@@ -56,10 +56,10 @@ def send_weekly_email():
     inv_df['Product'] = inv_df['ASIN'].map(asinNames)
 
     restock_df = inv_df[inv_df['Weeks On Hand'] < 6].copy()
-    restock_df['Suggested Order'] = restock_df.apply(
-        lambda r: math.ceil((12 - r['Weeks On Hand']) * r['Week Average'] / 10) * 10,
-        axis=1
-    )
+    restock_df['Suggested Order'] = (
+        ((12 - restock_df['Weeks On Hand']) * restock_df['Week Average'] / 10)
+        .apply(math.ceil) * 10
+    ).astype(int)
     restock_df = restock_df[['ASIN', 'Product', 'Weeks On Hand', 'Week Average', 'Suggested Order']]
 
     if restock_df.empty:
