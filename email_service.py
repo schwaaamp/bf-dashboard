@@ -7,27 +7,25 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, date, timedelta
 from inventoryService import InventoryService
-from salesService import SalesService
+from amzService2 import getSales
 from asinNameUtil import asinNames
-from asinSkuUtil import asinSkuMapper
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
 def get_weekly_sales():
-    salesService = SalesService()
     end = date.today() - timedelta(days=1)   # yesterday
     start = end - timedelta(days=6)          # 7 days back
     rows = []
-    for asin in asinSkuMapper.keys():
-        df = salesService.getSalesByDay(asin, start, end)
-        if df is not None and not df.empty:
+    for asin, name in asinNames.items():
+        df = getSales(asin, start, end, 'Day')
+        if df is not None and not df.empty and 'unitCount' in df.columns:
             rows.append({
                 'ASIN': asin,
-                'Product': asinNames.get(asin, asin),
-                'Units Sold': int(df['Unit Count'].sum()),
-                'Revenue': df['Sales'].sum()
+                'Product': name,
+                'Units Sold': int(df['unitCount'].sum()),
+                'Revenue': df['totalSales.amount'].sum()
             })
     return pd.DataFrame(rows).sort_values('Revenue', ascending=False)
 
