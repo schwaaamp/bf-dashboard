@@ -53,9 +53,17 @@ def send_weekly_email():
     inv_df = inventoryService.getInventoryNeeds()
     inv_df['Product'] = inv_df['ASIN'].map(asinNames)
 
+
+    # Say a product has 3.2 weeks on hand and sells 15 units/week on average and we are targeting 6 weeks on hand:
+    # 6 - 3.2 = 2.8 — weeks of stock needed to reach 6 weeks
+    # 2.8 * 15 = 42 — raw units needed
+    # 42 / 10 = 4.2 — divide by 10 (because you ship in cases of 10)
+    # ceil(4.2) = 5 — round up so you don't under-order
+    # 5 * 10 = 50 — multiply back to get actual units
+    # Result: order 50 units (5 cases of 10) to bring inventory from 3.2 weeks up to ~6 weeks.
     restock_df = inv_df[inv_df['Weeks On Hand'] < 6].copy()
     restock_df['Suggested Order'] = (
-        ((12 - restock_df['Weeks On Hand']) * restock_df['Week Average'] / 10)
+        ((6 - restock_df['Weeks On Hand']) * restock_df['Week Average'] / 10)
         .apply(math.ceil) * 10
     ).astype(int)
     restock_df = restock_df[['ASIN', 'Product', 'Weeks On Hand', 'Week Average', 'Suggested Order']]

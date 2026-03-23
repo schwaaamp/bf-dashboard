@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r \"callback\\\\|@cache\\\\|functools\" /Users/schwaaamp/bf-dashboard/*.py)",
+      "Bash(git add salesService.py)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(git add requirements.txt)",
+      "Bash(git add amzService2.py)",
+      "Bash(pip index versions flask)",
+      "Bash(pip index versions werkzeug)",
+      "Bash(git add pages/sales.py)",
+      "Bash(git add email_service.py)",
+      "Bash(git add send_email.py)"
+    ]
+  }
+}
