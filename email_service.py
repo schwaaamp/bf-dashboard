@@ -54,22 +54,19 @@ def send_weekly_email():
     inv_df['Product'] = inv_df['ASIN'].map(asinNames)
 
 
-    # Say a product has 3.2 weeks on hand and sells 15 units/week on average and we are targeting 6 weeks on hand:
-    # 6 - 3.2 = 2.8 — weeks of stock needed to reach 6 weeks
-    # 2.8 * 15 = 42 — raw units needed
-    # 42 / 10 = 4.2 — divide by 10 (because you ship in cases of 10)
-    # ceil(4.2) = 5 — round up so you don't under-order
-    # 5 * 10 = 50 — multiply back to get actual units
-    # Result: order 50 units (5 cases of 10) to bring inventory from 3.2 weeks up to ~6 weeks.
+    # Filter on fulfillable Weeks On Hand so stockouts surface even when inbound is in flight.
+    # Suggested Order is computed from Weeks Incl. Inbound so we don't double-order on top of
+    # stock that's already on its way (a row can show with Suggested Order 0 — that's the signal
+    # "fulfillable is empty but inbound covers it").
     restock_df = inv_df[inv_df['Weeks On Hand'] < 6].copy()
     restock_df['Suggested Order'] = (
-        ((6 - restock_df['Weeks On Hand']) * restock_df['Week Average'] / 10)
+        ((6 - restock_df['Weeks Incl. Inbound']).clip(lower=0) * restock_df['Week Average'] / 10)
         .apply(math.ceil) * 10
     ).astype(int)
-    restock_df = restock_df[['ASIN', 'Product', 'Weeks On Hand', 'Week Average', 'Suggested Order']]
+    restock_df = restock_df[['ASIN', 'Product', 'Weeks On Hand', 'Weeks Incl. Inbound', 'Week Average', 'Suggested Order']]
 
     if restock_df.empty:
-        restock_html = '<p style="color: green;">&#10003; All products are well-stocked (6+ weeks on hand).</p>'
+        restock_html = '<p style="color: green;">&#10003; All products are well-stocked (6+ weeks fulfillable).</p>'
     else:
         restock_html = restock_df.to_html(index=False, table_id="restock-table")
 
@@ -88,7 +85,7 @@ def send_weekly_email():
     <body>
         <h2>Sales &mdash; Last 7 Days</h2>
         {sales_html}
-        <h2>Replenishment Needed (&lt;6 Weeks On Hand)</h2>
+        <h2>Replenishment Watch (&lt;6 Weeks Fulfillable)</h2>
         {restock_html}
     </body>
     </html>

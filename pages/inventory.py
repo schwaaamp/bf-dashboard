@@ -32,12 +32,13 @@ def get_inventory_component(inventoryDf):
         { 'field': 'ASIN'},
         { 'field': 'Available', "type": "numericColumn"},
         { 'field': 'Total On Hand', "type": "numericColumn"},
-        { 'field': 'Weeks On Hand', 
+        { 'field': 'Weeks On Hand',
             "type": "numericColumn",
             'cellClassRules': {
                 'bg-danger text-white font-weight-bold': '6 > params.value',
             },
         },
+        { 'field': 'Weeks Incl. Inbound', "type": "numericColumn"},
     ]
 
     logging.info('Setting the AgGrid with updated dataframe...')

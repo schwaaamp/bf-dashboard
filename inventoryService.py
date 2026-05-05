@@ -34,8 +34,11 @@ class InventoryService:
                             df_eight = self.salesService.getSalesByWeek(asin, eight_start, eight_start + timedelta(weeks=num_weeks))
                             df_eight['ASIN'] = asin
                             week_avg = (df_eight.groupby(['ASIN'], observed=True)['Unit Count'].sum() / num_weeks)
-                            weeks_on_hand = float(format((available + inbound + fcTransfer) / week_avg.values[0], '.1f'))
-                            avgDf = pd.DataFrame({'ASIN': [asin], 'Available':[available], 'Total Inbound':[inbound], 'Total On Hand':[available + inbound + fcTransfer], 'Week Average':[week_avg.values[0]], 'Weeks On Hand':[weeks_on_hand]})
+                            # Weeks On Hand uses fulfillable only — what's actually sellable today.
+                            # Weeks Incl. Inbound adds stock in-transit / being received, used for replenishment math.
+                            weeks_on_hand = float(format(available / week_avg.values[0], '.1f'))
+                            weeks_incl_inbound = float(format((available + inbound + fcTransfer) / week_avg.values[0], '.1f'))
+                            avgDf = pd.DataFrame({'ASIN': [asin], 'Available':[available], 'Total Inbound':[inbound], 'Total On Hand':[available + inbound + fcTransfer], 'Week Average':[week_avg.values[0]], 'Weeks On Hand':[weeks_on_hand], 'Weeks Incl. Inbound':[weeks_incl_inbound]})
                             df = pd.concat([df, avgDf])
 
         # replace infinity values with 100

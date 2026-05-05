@@ -28,7 +28,7 @@ for summ in inventoryDf.values[0:1][0]:
                 df_eight = salesService.getSalesByWeek(asin, eight_start, eight_start + timedelta(weeks=num_weeks))
                 df_eight['ASIN'] = asin
                 week_avg = (df_eight.groupby(['ASIN'], observed=True)['Unit Count'].sum() / num_weeks)
-                avgDf = pd.DataFrame({'ASIN': [asin], 'Available':[available], 'Total Inbound':[inbound], 'Total On Hand':[available + inbound + fcTransfer], 'Week Average':[week_avg.values[0]], 'Weeks On Hand':[(available + inbound + fcTransfer) / week_avg.values[0]]})
+                avgDf = pd.DataFrame({'ASIN': [asin], 'Available':[available], 'Total Inbound':[inbound], 'Total On Hand':[available + inbound + fcTransfer], 'Week Average':[week_avg.values[0]], 'Weeks On Hand':[available / week_avg.values[0]], 'Weeks Incl. Inbound':[(available + inbound + fcTransfer) / week_avg.values[0]]})
                 df = pd.concat([df, avgDf])
 
 
